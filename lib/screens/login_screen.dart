@@ -1,5 +1,5 @@
 
-
+import 'package:tappy_app/screens/register_screen.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatefulWidget { 
@@ -53,6 +53,15 @@ class _LoginScreenState extends State<LoginScreen> {
               },
               child: const Text('Login'),
             ),
+            TextButton(
+              onPressed: (){
+                  Navigator.push(context, MaterialPageRoute
+                  (builder: (context) => RegisterScreen()),
+                  );
+
+              },
+              child: const Text('Don\'t have an account? Register'),
+            )
           ],
         ),
       ),
