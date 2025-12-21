@@ -3,97 +3,149 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/auth_response.dart';
 import '../utils/api_client.dart';
 
-
 class AuthService {
-    final ApiClient _apiClient;
-    static const String _tokenKey = 'auth_token';
-    static const String _expiryKey = 'token_expiry';
+  final ApiClient _apiClient;
+  static const String _tokenKey = 'auth_token';
+  static const String _expiryKey = 'token_expiry';
+  static const String _emailKey = 'user_email';
+  static const String _userNameKey = 'user_name';
+  static const String _userIdKey = 'user_id';
+  static const String _rolesKey = 'user_roles';
+  
+  AuthService(this._apiClient);
 
-    AuthService(this._apiClient);
+  Future<AuthResponse> register(String username, String email, String password) async {
+    final response = await _apiClient.post('/auth/register', {
+      'UserName': username,
+      'Email': email,
+      'Password': password,
+      'ConfirmPassword': password,
+    });
 
-    Future<AuthResponse> register(String username, String email, String password)
-    async {
-        final response = await _apiClient.post('/auth/register', {
-            'UserName': username,
-            'Email': email,
-            'Password': password,
-            'ConfirmPassword': password,
-        });
-
-        if(response.statusCode == 200 || response.statusCode == 201){
-          final data = json.decode(response.body);
-          await _saveToken(data['Token'], data['ExpiresAt']);
-
-          _apiClient.setToken(data['Token']);
-
-          return AuthResponse.fromJson(data);
-        }else{
-          final error = json.decode(response.body);
-          throw Exception (error['Message'] ?? error['message'] ??'Registration failed');
-        }
-    }
-
-
-    Future<AuthResponse> login(String email, String password) async{
-       final response = await _apiClient.post('/auth/login', 
-       {'Email': email, 
-       'Password': password}
-       );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final data = json.decode(response.body);
+      final authResponse = AuthResponse.fromJson(data);
       
-      if(response.statusCode == 200){
-        final data = json.decode(response.body);
-        await _saveToken(data['Token'], data['ExpiresAt']);
-
-        _apiClient.setToken(data['Token']);
-
-        return AuthResponse.fromJson(data);
-      }else if(response.statusCode == 401){
-        throw Exception('Invalid email or password');
-      }else{
-        final error = json.decode(response.body);
-        throw Exception (error['Message'] ?? error['message'] ??'Login failed');
-      }
+      await _saveToken(data['Token'], data['ExpiresAt']);
+      await _saveUserData(
+        data['UserId'],
+        data['Email'],
+        data['UserName'],
+        List<String>.from(data['Roles'] ?? []),
+      );
+      _apiClient.setToken(data['Token']);
       
+      return authResponse;
+    } else {
+      final error = json.decode(response.body);
+      throw Exception(error['Message'] ?? error['message'] ?? 'Registration failed');
     }
+  }
 
-    Future<void> _saveToken(String token, String expiresAt) async {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_tokenKey, token);
-      await prefs.setString(_expiryKey, expiresAt);
+  Future<AuthResponse> login(String email, String password) async {
+    final response = await _apiClient.post('/auth/login', {
+      'Email': email,
+      'Password': password,
+    });
+    
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final authResponse = AuthResponse.fromJson(data);
+      
+      await _saveToken(data['Token'], data['ExpiresAt']);
+      await _saveUserData(
+        data['UserId'],
+        data['Email'],
+        data['UserName'],
+        List<String>.from(data['Roles'] ?? []),
+      );
+      _apiClient.setToken(data['Token']);
+      
+      return authResponse;
+    } else if (response.statusCode == 401) {
+      throw Exception('Invalid email or password');
+    } else {
+      final error = json.decode(response.body);
+      throw Exception(error['Message'] ?? error['message'] ?? 'Login failed');
     }
+  }
 
+  Future<void> _saveToken(String token, String expiresAt) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_tokenKey, token);
+    await prefs.setString(_expiryKey, expiresAt);
+  }
 
-    Future<String?> getSavedToken() async {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString(_tokenKey);
-      final expiryStr = prefs.getString(_expiryKey);
+  Future<void> _saveUserData(String userId, String email, String userName, List<String> roles) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_userIdKey, userId);
+    await prefs.setString(_emailKey, email);
+    await prefs.setString(_userNameKey, userName);
+    await prefs.setString(_rolesKey, json.encode(roles));
+  }
 
-      if(token != null && expiryStr != null){
-        
-        try{
-          final expiry = DateTime.parse(expiryStr);
-          if(DateTime.now().isBefore(expiry)){
-            _apiClient.setToken(token);
-            return token;
-          }
-        }catch(e){
-          await clearToken();
-          return null;
+  Future<String?> getSavedToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString(_tokenKey);
+    final expiryStr = prefs.getString(_expiryKey);
+
+    if (token != null && expiryStr != null) {
+      try {
+        final expiry = DateTime.parse(expiryStr);
+        if (DateTime.now().isBefore(expiry)) {
+          _apiClient.setToken(token);
+          return token;
         }
-
+      } catch (e) {
+        await clearToken();
+        return null;
       }
-      await clearToken();
-      return null;
     }
+    await clearToken();
+    return null;
+  }
 
+  Future<void> clearToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_tokenKey);
+    await prefs.remove(_expiryKey);
+    await prefs.remove(_userIdKey);
+    await prefs.remove(_emailKey);
+    await prefs.remove(_userNameKey);
+    await prefs.remove(_rolesKey);
+    _apiClient.clearToken();
+  }
 
-    Future<void> clearToken() async {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(_tokenKey);
-      await prefs.remove(_expiryKey);
-      _apiClient.clearToken();
+  Future<AuthResponse?> getSavedAuthData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString(_tokenKey);
+    final expiryStr = prefs.getString(_expiryKey);
+    final userId = prefs.getString(_userIdKey);
+    final email = prefs.getString(_emailKey);
+    final userName = prefs.getString(_userNameKey);
+    final rolesJson = prefs.getString(_rolesKey);
+
+    if (token != null && expiryStr != null && userId != null && 
+        email != null && userName != null && rolesJson != null) {
+      try {
+        final expiry = DateTime.parse(expiryStr);
+        if (DateTime.now().isBefore(expiry)) {
+          _apiClient.setToken(token);
+          return AuthResponse(
+            userId: userId,
+            token: token,
+            email: email,
+            userName: userName,
+            expiresAt: expiry,
+            roles: List<String>.from(json.decode(rolesJson)),
+          );
+        }
+      } catch (e) {
+        await clearToken();
+        return null;
+      }
     }
-
+    await clearToken();
+    return null;
+  }
 }
-
-
