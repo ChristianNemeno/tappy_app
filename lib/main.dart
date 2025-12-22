@@ -34,27 +34,51 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
+
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        Provider(create: (_) => ApiClient()),
+        ProxyProvider<ApiClient, AuthService>(
+          update: (_, client, __) => AuthService(client),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => AuthProvider(
+            context.read<AuthService>(),
+          ),
+        ),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'TAPCET Quiz',
       theme: ThemeData(
-       
-      colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 4, 80, 2)),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 4, 80, 2)),
+        useMaterial3: true,
       ),
-      home: const LoginScreen(),
-      // routes: {
-      //   '/home' : (_) => const AppShell(),
+      home: Consumer<AuthProvider>(
+        builder:(context, auth, _){
+          if (auth.isLoading) {
+            return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          }
 
-      // }
+          if(auth.isAuthenticated){
+            return const HomeScreen();
+          }else{
+            return const LoginScreen();
+          }
+        },
+      )
+      
     );
   }
 }
