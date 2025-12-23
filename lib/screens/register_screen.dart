@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:tappy_app/providers/auth_provider.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({Key? key}) : super(key: key);
+  const RegisterScreen({super.key});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -9,102 +11,86 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _usernameCtrl = TextEditingController();
-  final TextEditingController _emailCtrl = TextEditingController();
-  final TextEditingController _passwordCtrl = TextEditingController();
+  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
 
-  @override
+ @override
   void dispose() {
-    _usernameCtrl.dispose();
-    _emailCtrl.dispose();
-    _passwordCtrl.dispose();
+    _usernameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Register pressed — UI only')),
+
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final success = await authProvider.register(
+      _usernameController.text.trim(),
+      _emailController.text.trim(),
+      _passwordController.text.trim(),
     );
-  }
 
-  String? _validateEmail(String? v) {
-    if (v == null || v.trim().isEmpty) return 'Enter email';
-    final email = v.trim();
-    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
-    return emailRegex.hasMatch(email) ? null : 'Enter valid email';
-  }
-
-  String? _validatePassword(String? v) {
-    if (v == null || v.length < 6) return 'Password must be at least 6 characters';
-    return null;
-  }
-
-  String? _validateUsername(String? v) {
-    if (v == null || v.trim().length < 3) return 'Username must be at least 3 characters';
-    return null;
+    if (success) {
+      if (mounted) Navigator.of(context).pop();
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(content: Text(authProvider.error ?? 'An unknown error occurred')),
+          );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Register')),
-      body: SafeArea(
+      body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(16.0),
           child: Form(
             key: _formKey,
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const SizedBox(height: 24),
-                const FlutterLogo(size: 72),
-                const SizedBox(height: 24),
                 TextFormField(
-                  controller: _usernameCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Username',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: _validateUsername,
-                  textInputAction: TextInputAction.next,
+                  controller: _usernameController,
+                  decoration: const InputDecoration(labelText: 'Username', border: OutlineInputBorder()),
+                  validator: (value) => (value == null || value.isEmpty) ? 'Please enter a username' : null,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 TextFormField(
-                  controller: _emailCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    border: OutlineInputBorder(),
-                  ),
+                  controller: _emailController,
+                  decoration: const InputDecoration(labelText: 'Email', border: OutlineInputBorder()),
                   keyboardType: TextInputType.emailAddress,
-                  validator: _validateEmail,
-                  textInputAction: TextInputAction.next,
+                  validator: (value) => (value == null || value.isEmpty) ? 'Please enter an email' : null,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 TextFormField(
-                  controller: _passwordCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Password',
-                    border: OutlineInputBorder(),
-                  ),
+                  controller: _passwordController,
+                  decoration: const InputDecoration(labelText: 'Password', border: OutlineInputBorder()),
                   obscureText: true,
-                  validator: _validatePassword,
-                  textInputAction: TextInputAction.done,
+                  validator: (value) => (value == null || value.length < 6) ? 'Password must be at least 6 characters' : null,
                 ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _submit,
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 14),
-                      child: Text('Create account'),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Already have an account? Log in'),
+                const SizedBox(height: 20),
+                Consumer<AuthProvider>(
+                  builder: (context, auth, child) {
+                    if (auth.isLoading) {
+                      return const CircularProgressIndicator();
+                    }
+                    return ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 50),
+                      ),
+                      onPressed: _register,
+                      child: const Text('Register'),
+                    );
+                  },
                 ),
               ],
             ),
