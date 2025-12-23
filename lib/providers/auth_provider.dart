@@ -3,7 +3,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/auth_response.dart';
 import '../services/auth_service.dart';
 
-
 class AuthProvider extends ChangeNotifier {
 
   final AuthService _authService;
@@ -63,18 +62,12 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-
   Future<void> logout() async {
     
     _authData = null;
     await _authService.clearToken();
     notifyListeners();
   }
-
-  
-
-
-
 
   void _setLoading(bool value) {
     _isLoading = value;
