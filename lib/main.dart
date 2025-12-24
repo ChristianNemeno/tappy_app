@@ -1,39 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tappy_app/providers/auth_provider.dart';
+import 'package:tappy_app/providers/quiz_provider.dart';
+import 'package:tappy_app/screens/main_shell.dart';
 import 'package:tappy_app/screens/login_screen.dart';
 import 'package:tappy_app/services/auth_service.dart';
+import 'package:tappy_app/services/quiz_service.dart';
 import 'package:tappy_app/utils/api_client.dart';
-
-
-
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-
-    return Scaffold(      
-      appBar: AppBar(
-        title: Text('Welcome ${authProvider.authData?.userName ?? 'User'}'),
-      ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text('You are logged in!'),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () => authProvider.logout(),
-            child: const Text('Logout'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 
 void main() {
   runApp(
@@ -43,9 +16,17 @@ void main() {
         ProxyProvider<ApiClient, AuthService>(
           update: (_, client, __) => AuthService(client),
         ),
+        ProxyProvider<ApiClient, QuizService>(
+          update: (_, client, __) => QuizService(client),
+        ),
         ChangeNotifierProvider(
           create: (context) => AuthProvider(
             context.read<AuthService>(),
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => QuizProvider(
+            context.read<QuizService>(),
           ),
         ),
       ],
@@ -62,23 +43,26 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'TAPCET Quiz',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 4, 80, 2)),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color.fromARGB(255, 4, 80, 2),
+        ),
         useMaterial3: true,
       ),
       home: Consumer<AuthProvider>(
-        builder:(context, auth, _){
+        builder: (context, auth, _) {
           if (auth.isLoading) {
-            return const Scaffold(body: Center(child: CircularProgressIndicator()));
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
           }
 
-          if(auth.isAuthenticated){
-            return const HomeScreen();
-          }else{
+          if (auth.isAuthenticated) {
+            return const MainShell();
+          } else {
             return const LoginScreen();
           }
         },
-      )
-      
+      ),
     );
   }
 }
