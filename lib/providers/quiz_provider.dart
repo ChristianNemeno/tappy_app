@@ -1,0 +1,46 @@
+import 'package:flutter/material.dart';
+import '../models/quiz.dart';
+import '../services/quiz_service.dart';
+
+class QuizProvider extends ChangeNotifier {
+  final QuizService _quizService;
+
+  List<Quiz> _quizzes = [];
+  bool _isLoading = false;
+  String? _error;
+
+  /**
+   * Getters for quizzes, loading state, and error message.
+   */
+  List<Quiz> get quizzes => _quizzes;
+  bool get isLoading => _isLoading;
+  String? get error => _error;
+
+  QuizProvider(this._quizService);
+
+  /**
+   * Fetches the list of active quizzes from the 
+   * QuizService and updates the state accordingly.
+   */
+  Future<void> fetchActiveQuizzes() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      _quizzes = await _quizService.getActiveQuizzes();
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /** Refreshes the list of active quizzes 
+   * by re-fetching them from the QuizService. */
+  Future<void> refreshQuizzes() async {
+    await fetchActiveQuizzes();
+  }
+}
