@@ -24,8 +24,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _register() async {
-    if (!_formKey.currentState!.validate()) return;
+    print('🔘 Register button pressed');
+    
+    if (!_formKey.currentState!.validate()) {
+      print('❌ Form validation failed');
+      return;
+    }
 
+    print('✅ Form validation passed');
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final success = await authProvider.register(
       _usernameController.text.trim(),

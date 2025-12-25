@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/auth_response.dart';
 import '../services/auth_service.dart';
+import 'dart:developer' as developer;
+
+
 
 class AuthProvider extends ChangeNotifier {
 
@@ -37,9 +40,12 @@ class AuthProvider extends ChangeNotifier {
     try{
       final result = await _authService.login(email, password);
       _authData = result;
+      _log(_authData.toString());
+      _log('inside login method of provider');
       _setLoading(false);
       return true;
     }catch(e){
+      _log('Login failed', error: e);
       _setError(e.toString());
       _setLoading(false);
       return false;
@@ -50,13 +56,17 @@ class AuthProvider extends ChangeNotifier {
   Future<bool> register(String username, String email, String password) async
   {
     _setLoading(true);
+    print('📝 Attempting registration for: $email');
 
     try{
       final result = await _authService.register(username, email, password);
       _authData = result;
+      print('✅ Registration successful: ${_authData?.userName}');
+      print('📊 Auth data: $_authData');
       _setLoading(false);
       return true;
     }catch(e){
+      print('❌ Registration failed: $e');
       _setError(e.toString());
       return false;
     }
@@ -80,7 +90,9 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-
+  void _log(String message, {Object? error, StackTrace? stackTrace}) {
+    developer.log(message, name: 'AuthProvider', error: error, stackTrace: stackTrace);
+  }
 
 
 }

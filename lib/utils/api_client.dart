@@ -5,7 +5,9 @@ import 'dart:convert';
 
 class ApiClient {
   
-  static const String baseUrl = 'https://localhost:7237/api';
+  //static const String baseUrl = 'https://localhost:7237/api';
+
+  final baseUrl = 'http://192.168.254.108/api';
 
   String? _token;
 
