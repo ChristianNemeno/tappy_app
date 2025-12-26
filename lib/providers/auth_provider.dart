@@ -56,17 +56,17 @@ class AuthProvider extends ChangeNotifier {
   Future<bool> register(String username, String email, String password) async
   {
     _setLoading(true);
-    print('📝 Attempting registration for: $email');
+    print(' Attempting registration for: $email');
 
     try{
       final result = await _authService.register(username, email, password);
       _authData = result;
-      print('✅ Registration successful: ${_authData?.userName}');
-      print('📊 Auth data: $_authData');
+      print(' Registration successful: ${_authData?.userName}');
+      print(' Auth data: $_authData');
       _setLoading(false);
       return true;
     }catch(e){
-      print('❌ Registration failed: $e');
+      print(' Registration failed: $e');
       _setError(e.toString());
       return false;
     }
