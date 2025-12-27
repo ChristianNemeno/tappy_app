@@ -7,6 +7,8 @@ import 'package:tappy_app/screens/login_screen.dart';
 import 'package:tappy_app/services/auth_service.dart';
 import 'package:tappy_app/services/quiz_service.dart';
 import 'package:tappy_app/utils/api_client.dart';
+import 'package:tappy_app/providers/attempt_provider.dart';
+import 'package:tappy_app/services/attempt_service.dart';
 
 void main() {
   runApp(
@@ -27,6 +29,11 @@ void main() {
         ChangeNotifierProvider(
           create: (context) => QuizProvider(
             context.read<QuizService>(),
+          ),
+        ),
+        ChangeNotifierProvider( 
+          create: (context) => AttemptProvider(
+            context.read<AttemptService>(),
           ),
         ),
       ],
