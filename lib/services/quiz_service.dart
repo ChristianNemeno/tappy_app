@@ -1,5 +1,6 @@
 import 'dart:convert';
 import '../models/quiz.dart';
+import '../models/quiz_detail.dart';
 import '../utils/api_client.dart';
 
 class QuizService {
@@ -23,6 +24,19 @@ class QuizService {
 
     if (response.statusCode == 200) {
       return Quiz.fromJson(json.decode(response.body));
+    } else if (response.statusCode == 404) {
+      throw Exception('Quiz not found');
+    } else {
+      throw Exception('Failed to load quiz details');
+    }
+  }
+
+  /// Get quiz details with questions for taking the quiz
+  Future<QuizDetail> getQuizWithQuestions(int id) async {
+    final response = await _apiClient.get('/quiz/$id');
+
+    if (response.statusCode == 200) {
+      return QuizDetail.fromJson(json.decode(response.body));
     } else if (response.statusCode == 404) {
       throw Exception('Quiz not found');
     } else {
