@@ -21,6 +21,9 @@ void main() {
         ProxyProvider<ApiClient, QuizService>(
           update: (_, client, __) => QuizService(client),
         ),
+        ProxyProvider<ApiClient, AttemptService>(
+          update: (_, client, __) => AttemptService(client),
+        ),
         ChangeNotifierProvider(
           create: (context) => AuthProvider(
             context.read<AuthService>(),
