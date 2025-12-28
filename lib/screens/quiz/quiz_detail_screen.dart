@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/quiz.dart';
+import '../../models/quiz_detail.dart';
 import '../../services/quiz_service.dart';
+import '../../providers/attempt_provider.dart';
+import 'quiz_taking_screen.dart';
 
 class QuizDetailScreen extends StatefulWidget {
   final int quizId;
@@ -75,14 +78,79 @@ class _QuizDetailScreenState extends State<QuizDetailScreen> {
 
     if (confirm != true) return;
 
-    // TODO: Implement quiz start logic
-    // 1. Call POST /api/attempt/start with quizId
-    // 2. Navigate to QuizTakingScreen with attempt data
-    
-    if (mounted) {
+    // Show loading
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: Card(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Loading quiz...'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    try {
+      // Fetch quiz with questions
+      final quizService = context.read<QuizService>();
+      final quizDetail = await quizService.getQuizWithQuestions(widget.quizId);
+
+      if (!mounted) return;
+
+      // Close loading dialog
+      Navigator.pop(context);
+
+      // Check if quiz has questions
+      if (quizDetail.questions.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('This quiz has no questions'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      // Navigate to quiz taking screen
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => QuizTakingScreen(
+            quiz: Quiz(
+              id: quizDetail.id,
+              title: quizDetail.title,
+              description: quizDetail.description,
+              createdById: quizDetail.createdById,
+              createdByName: quizDetail.createdByName,
+              isActive: quizDetail.isActive,
+              questionCount: quizDetail.questionCount,
+              createdAt: quizDetail.createdAt,
+            ),
+            questions: quizDetail.questions,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      // Close loading dialog
+      Navigator.pop(context);
+
+      // Show error
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Quiz taking feature coming in Phase 3'),
+        SnackBar(
+          content: Text('Failed to load quiz: ${e.toString().replaceAll('Exception: ', '')}'),
+          backgroundColor: Colors.red,
         ),
       );
     }
