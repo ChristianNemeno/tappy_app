@@ -30,17 +30,17 @@ class AttemptResult {
 
   factory AttemptResult.fromJson(Map<String, dynamic> json) {
     return AttemptResult(
-      quizAttemptId: json['quizAttemptId'],
-      quizTitle: json['quizTitle'] ?? '',
-      totalQuestions: json['totalQuestions'],
-      correctAnswers: json['correctAnswers'],
-      incorrectAnswers: json['incorrectAnswers'],
-      score: (json['score'] ?? 0).toDouble(),
-      percentage: (json['percentage'] ?? 0).toDouble(),
-      startedAt: DateTime.parse(json['startedAt']),
-      completedAt: DateTime.parse(json['completedAt']),
-      duration: json['duration'] ?? '',
-      questionResults: (json['questionResults'] as List<dynamic>)
+      quizAttemptId: json['QuizAttemptId'],
+      quizTitle: json['QuizTitle'] ?? '',
+      totalQuestions: json['TotalQuestions'],
+      correctAnswers: json['CorrectAnswers'],
+      incorrectAnswers: json['IncorrectAnswers'],
+      score: (json['Score'] ?? 0).toDouble(),
+      percentage: (json['Percentage'] ?? 0).toDouble(),
+      startedAt: DateTime.parse(json['StartedAt']),
+      completedAt: DateTime.parse(json['CompletedAt']),
+      duration: json['Duration'] ?? '',
+      questionResults: (json['QuestionResults'] as List<dynamic>)
           .map((q) => QuestionResult.fromJson(q))
           .toList(),
     );

@@ -13,19 +13,19 @@ class Choice {
 
   factory Choice.fromJson(Map<String, dynamic> json) {
     return Choice(
-      id: json['id'],
-      text: json['text'] ?? '',
-      isCorrect: json['isCorrect'],
-      questionId: json['questionId'],
+      id: json['Id'],
+      text: json['Text'] ?? '',
+      isCorrect: json['IsCorrect'],
+      questionId: json['QuestionId'] ?? 0,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'text': text,
-      if (isCorrect != null) 'isCorrect': isCorrect,
-      'questionId': questionId,
+      'Id': id,
+      'Text': text,
+      if (isCorrect != null) 'IsCorrect': isCorrect,
+      'QuestionId': questionId,
     };
   }
 }

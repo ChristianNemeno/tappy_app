@@ -24,17 +24,17 @@ class QuizAttempt {
 
   factory QuizAttempt.fromJson(Map<String, dynamic> json) {
     return QuizAttempt(
-      id: json['id'],
-      quizId: json['quizId'],
-      quizTitle: json['quizTitle'] ?? '',
-      userId: json['userId'] ?? '',
-      userName: json['userName'] ?? '',
-      startedAt: DateTime.parse(json['startedAt']),
-      completedAt: json['completedAt'] != null
-          ? DateTime.parse(json['completedAt'])
+      id: json['Id'],
+      quizId: json['QuizId'],
+      quizTitle: json['QuizTitle'] ?? '',
+      userId: json['UserId'] ?? '',
+      userName: json['UserName'] ?? '',
+      startedAt: DateTime.parse(json['StartedAt']),
+      completedAt: json['CompletedAt'] != null
+          ? DateTime.parse(json['CompletedAt'])
           : null,
-      score: (json['score'] ?? 0).toDouble(),
-      isCompleted: json['isCompleted'] ?? false,
+      score: (json['Score'] ?? 0).toDouble(),
+      isCompleted: json['IsCompleted'] ?? false,
     );
   }
 
