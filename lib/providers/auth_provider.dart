@@ -19,6 +19,7 @@ class AuthProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
   bool get isAuthenticated => _authData != null;
+  String? get userName => _authData?.userName;
   
   AuthProvider(this._authService){
     _tryAutoLogin();
