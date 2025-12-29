@@ -186,6 +186,7 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
         MaterialPageRoute(
           builder: (context) => QuizResultScreen(
             result: provider.lastResult!,
+            quizId: widget.quiz.id,
           ),
         ),
       );
