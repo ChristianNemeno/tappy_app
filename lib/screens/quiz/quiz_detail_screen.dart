@@ -5,6 +5,7 @@ import '../../models/quiz_detail.dart';
 import '../../services/quiz_service.dart';
 import '../../providers/attempt_provider.dart';
 import 'quiz_taking_screen.dart';
+import 'leaderboard_screen.dart';
 
 class QuizDetailScreen extends StatefulWidget {
   final int quizId;
@@ -161,6 +162,24 @@ class _QuizDetailScreenState extends State<QuizDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Quiz Details'),
+        actions: [
+          if (_quiz != null)
+            IconButton(
+              icon: const Icon(Icons.leaderboard),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LeaderboardScreen(
+                      quizId: _quiz!.id,
+                      quizTitle: _quiz!.title,
+                    ),
+                  ),
+                );
+              },
+              tooltip: 'View Leaderboard',
+            ),
+        ],
       ),
       body: _buildBody(),
       bottomNavigationBar: _quiz != null && _quiz!.isActive
