@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import '../../models/attempt_result.dart';
 import 'detailed_review_screen.dart';
+import 'leaderboard_screen.dart';
 
 class QuizResultScreen extends StatelessWidget {
   final AttemptResult result;
+  final int? quizId;
 
   const QuizResultScreen({
     super.key,
     required this.result,
+    this.quizId,
   });
 
   Color _getScoreColor(double percentage) {
@@ -223,6 +226,26 @@ class QuizResultScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
+                  if (quizId != null)
+                    OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LeaderboardScreen(
+                              quizId: quizId!,
+                              quizTitle: result.quizTitle,
+                            ),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.leaderboard),
+                      label: const Text('View Leaderboard'),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(50),
+                      ),
+                    ),
+                  if (quizId != null) const SizedBox(height: 12),
                   OutlinedButton.icon(
                     onPressed: () {
                       Navigator.popUntil(context, (route) => route.isFirst);
