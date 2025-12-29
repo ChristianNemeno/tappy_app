@@ -4,6 +4,7 @@ import '../models/quiz_attempt.dart';
 import '../models/submit_attempt_request.dart';
 import '../models/submit_answer.dart';
 import '../models/attempt_result.dart';
+import '../models/leaderboard_entry.dart';
 import '../utils/api_client.dart';
 
 class AttemptService {
@@ -98,6 +99,25 @@ class AttemptService {
       return data.map((json) => QuizAttempt.fromJson(json)).toList();
     } else {
       throw Exception('Failed to load user attempts');
+    }
+  }
+
+  /// GET /api/quiz-attempt/quiz/{quizId}/leaderboard
+  Future<List<LeaderboardEntry>> getLeaderboard(int quizId, {int topCount = 10}) async {
+    print('📊 Fetching leaderboard for quiz $quizId (top $topCount)');
+    
+    final response = await _apiClient.get(
+      '/quiz-attempt/quiz/$quizId/leaderboard?topCount=$topCount',
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => LeaderboardEntry.fromJson(json)).toList();
+    } else if (response.statusCode == 400) {
+      final error = json.decode(response.body);
+      throw Exception(error['message'] ?? 'Invalid request');
+    } else {
+      throw Exception('Failed to load leaderboard');
     }
   }
 }
