@@ -26,14 +26,14 @@ class AuthService {
       final data = json.decode(response.body);
       final authResponse = AuthResponse.fromJson(data);
       
-      await _saveToken(data['Token'], data['ExpiresAt']);
+      await _saveToken(data['token'], data['expiresAt']);
       await _saveUserData(
-        data['UserId'],
-        data['Email'],
-        data['UserName'],
-        List<String>.from(data['Roles'] ?? []),
+        data['userId'],
+        data['email'],
+        data['userName'],
+        List<String>.from(data['roles'] ?? []),
       );
-      _apiClient.setToken(data['Token']);
+      _apiClient.setToken(data['token']);
       
       return authResponse;
     } else {
@@ -52,14 +52,14 @@ class AuthService {
       final data = json.decode(response.body);
       final authResponse = AuthResponse.fromJson(data);
       
-      await _saveToken(data['Token'], data['ExpiresAt']);
+      await _saveToken(data['token'], data['expiresAt']);
       await _saveUserData(
-        data['UserId'],
-        data['Email'],
-        data['UserName'],
-        List<String>.from(data['Roles'] ?? []),
+        data['userId'],
+        data['email'],
+        data['userName'],
+        List<String>.from(data['roles'] ?? []),
       );
-      _apiClient.setToken(data['Token']);
+      _apiClient.setToken(data['token']);
       
       return authResponse;
     } else if (response.statusCode == 401) {

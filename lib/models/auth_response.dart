@@ -18,13 +18,14 @@ class AuthResponse {
   });
 
   factory AuthResponse.fromJson(Map<String, dynamic> json) {
+    print('🔍 Parsing AuthResponse from JSON: $json');
     return AuthResponse(
-      userId: json['UserId'],
-      token: json['Token'],
-      email: json['Email'],
-      userName: json['UserName'],
-      expiresAt: DateTime.parse(json['ExpiresAt']),
-      roles: List<String>.from(json['Roles'] ?? []),
+      userId: json['userId'] as String,
+      token: json['token'] as String,
+      email: json['email'] as String,
+      userName: json['userName'] as String,
+      expiresAt: DateTime.parse(json['expiresAt'] as String),
+      roles: List<String>.from(json['roles'] ?? []),
     );
   }
 }

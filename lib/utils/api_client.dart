@@ -7,7 +7,7 @@ class ApiClient {
   
   //static const String baseUrl = 'https://localhost:7237/api';
 
-  final baseUrl = 'http://192.168.254.108/api';
+  final baseUrl = 'http://10.0.2.2:5080/api';
 
   String? _token;
 
