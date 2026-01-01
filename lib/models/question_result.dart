@@ -21,14 +21,14 @@ class QuestionResult {
 
   factory QuestionResult.fromJson(Map<String, dynamic> json) {
     return QuestionResult(
-      questionId: json['QuestionId'],
-      questionText: json['QuestionText'] ?? '',
-      explanation: json['Explanation'],
-      selectedChoiceId: json['SelectedChoiceId'],
-      selectedChoiceText: json['SelectedChoiceText'] ?? '',
-      correctChoiceId: json['CorrectChoiceId'],
-      correctChoiceText: json['CorrectChoiceText'] ?? '',
-      isCorrect: json['IsCorrect'] ?? false,
+      questionId: json['questionId'],
+      questionText: json['questionText'] ?? '',
+      explanation: json['explanation'],
+      selectedChoiceId: json['selectedChoiceId'],
+      selectedChoiceText: json['selectedChoiceText'] ?? '',
+      correctChoiceId: json['correctChoiceId'],
+      correctChoiceText: json['correctChoiceText'] ?? '',
+      isCorrect: json['isCorrect'] ?? false,
     );
   }
 }

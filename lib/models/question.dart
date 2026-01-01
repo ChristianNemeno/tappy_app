@@ -19,12 +19,12 @@ class Question {
 
   factory Question.fromJson(Map<String, dynamic> json) {
     return Question(
-      id: json['Id'],
-      text: json['Text'] ?? '',
-      explanation: json['Explanation'],
-      imageUrl: json['ImageUrl'],
-      quizId: json['QuizId'],
-      choices: (json['Choices'] as List<dynamic>)
+      id: json['id'],
+      text: json['text'] ?? '',
+      explanation: json['explanation'],
+      imageUrl: json['imageUrl'],
+      quizId: json['quizId'],
+      choices: (json['choices'] as List<dynamic>)
           .map((c) => Choice.fromJson(c))
           .toList(),
     );

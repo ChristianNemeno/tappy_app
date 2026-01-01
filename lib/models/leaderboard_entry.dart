@@ -13,10 +13,10 @@ class LeaderboardEntry {
 
   factory LeaderboardEntry.fromJson(Map<String, dynamic> json) {
     return LeaderboardEntry(
-      id: json['Id'],
-      userName: json['UserName'] ?? '',
-      score: (json['Score'] ?? 0).toDouble(),
-      completedAt: DateTime.parse(json['CompletedAt']),
+      id: json['id'],
+      userName: json['userName'] ?? '',
+      score: (json['score'] ?? 0).toDouble(),
+      completedAt: DateTime.parse(json['completedAt']),
     );
   }
 }

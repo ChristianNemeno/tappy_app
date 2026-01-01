@@ -21,14 +21,14 @@ class Quiz {
 
   factory Quiz.fromJson(Map<String, dynamic> json) {
     return Quiz(
-      id: json['Id'],
-      title: json['Title'],
-      description: json['Description'],
-      createdById: json['CreatedById'],
-      createdByName: json['CreatedByName'],
-      isActive: json['IsActive'],
-      questionCount: json['QuestionCount'],
-      createdAt: DateTime.parse(json['CreatedAt']),
+      id: json['id'],
+      title: json['title'],
+      description: json['description'],
+      createdById: json['createdById'],
+      createdByName: json['createdByName'],
+      isActive: json['isActive'],
+      questionCount: json['questionCount'],
+      createdAt: DateTime.parse(json['createdAt']),
     );
   }
 }
