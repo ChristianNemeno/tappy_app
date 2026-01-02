@@ -33,38 +33,84 @@ class ApiClient {
 
   Future<http.Response> get(String endpoint) async {
     final uri = Uri.parse('$baseUrl$endpoint');
-    return await http.get(uri, headers: _headers());
+    try {
+      return await http.get(uri, headers: _headers()).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw Exception('Connection timeout - unable to reach server');
+        },
+      );
+    } catch (e) {
+      throw Exception('Network error: ${e.toString()}');
+    }
   }
 
   Future<http.Response> post(String endpoint, Map<String, dynamic> body) async {
     final uri = Uri.parse('$baseUrl$endpoint');
-    return await http.post(
-      uri,
-      headers: _headers(),
-      body: json.encode(body),
-    );
+    try {
+      return await http.post(
+        uri,
+        headers: _headers(),
+        body: json.encode(body),
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw Exception('Connection timeout - unable to reach server');
+        },
+      );
+    } catch (e) {
+      throw Exception('Network error: ${e.toString()}');
+    }
   }
+  
   Future<http.Response> put(String endpoint, Map<String, dynamic> body) async {
     final uri = Uri.parse('$baseUrl$endpoint');
-    return await http.put(
-      uri,
-      headers: _headers(),
-      body: json.encode(body),
-    );
+    try {
+      return await http.put(
+        uri,
+        headers: _headers(),
+        body: json.encode(body),
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw Exception('Connection timeout - unable to reach server');
+        },
+      );
+    } catch (e) {
+      throw Exception('Network error: ${e.toString()}');
+    }
   }
 
   Future<http.Response> delete(String endpoint) async {
     final uri = Uri.parse('$baseUrl$endpoint');
-    return await http.delete(uri, headers: _headers());
+    try {
+      return await http.delete(uri, headers: _headers()).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw Exception('Connection timeout - unable to reach server');
+        },
+      );
+    } catch (e) {
+      throw Exception('Network error: ${e.toString()}');
+    }
   }
   
   Future<http.Response> patch(String endpoint, [Map<String, dynamic>? body]) async {
     final uri = Uri.parse('$baseUrl$endpoint');
-    return await http.patch(
-      uri,
-      headers: _headers(),
-      body: body != null ? json.encode(body) : null,
-    );
+    try {
+      return await http.patch(
+        uri,
+        headers: _headers(),
+        body: body != null ? json.encode(body) : null,
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw Exception('Connection timeout - unable to reach server');
+        },
+      );
+    } catch (e) {
+      throw Exception('Network error: ${e.toString()}');
+    }
   }
 
 }

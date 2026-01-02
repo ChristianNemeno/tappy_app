@@ -44,7 +44,7 @@ class AuthResult {
   });
 
   factory AuthResult.fromJson(Map<String, dynamic> json) {
-    print('🔍 Parsing AuthResult from JSON: $json');
+    print('+I AM IN auth_response.dart+ Parsing AuthResult from JSON: $json');
     
     // Success case - data is at root level
     if (json.containsKey('userId') && json.containsKey('token')) {

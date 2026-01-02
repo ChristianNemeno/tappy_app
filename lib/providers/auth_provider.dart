@@ -57,18 +57,19 @@ class AuthProvider extends ChangeNotifier {
   Future<bool> register(String username, String email, String password) async
   {
     _setLoading(true);
-    print(' Attempting registration for: $email');
+    print('++I AM in auth_provider.dart, register fun++ Attempting registration for: $email');
 
     try{
       final result = await _authService.register(username, email, password);
       _authData = result;
-      print(' Registration successful: ${_authData?.userName}');
-      print(' Auth data: $_authData');
+      print('++I AM in auth_provider.dart, register fun++ Registration successful: ${_authData?.userName}');
+      print('++I AM in auth_provider.dart, register fun++ Auth data: $_authData');
       _setLoading(false);
       return true;
     }catch(e){
-      print(' Registration failed: $e');
+      print('++I AM in auth_provider.dart, register fun++ Registration failed: $e');
       _setError(e.toString());
+      _setLoading(false);
       return false;
     }
   }
