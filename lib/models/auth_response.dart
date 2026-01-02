@@ -29,3 +29,49 @@ class AuthResponse {
     );
   }
 }
+
+class AuthResult {
+  final bool succeeded;
+  final AuthResponse? data;
+  final String? errorMessage;
+  final List<String>? errors;
+
+  AuthResult({
+    required this.succeeded,
+    this.data,
+    this.errorMessage,
+    this.errors,
+  });
+
+  factory AuthResult.fromJson(Map<String, dynamic> json) {
+    print('🔍 Parsing AuthResult from JSON: $json');
+    
+    // Success case - data is at root level
+    if (json.containsKey('userId') && json.containsKey('token')) {
+      return AuthResult(
+        succeeded: true,
+        data: AuthResponse.fromJson(json),
+        errorMessage: null,
+        errors: null,
+      );
+    }
+    
+    // Error case - has message and errors
+    if (json.containsKey('message')) {
+      return AuthResult(
+        succeeded: false,
+        data: null,
+        errorMessage: json['message'] as String?,
+        errors: json['errors'] != null 
+            ? List<String>.from(json['errors']) 
+            : null,
+      );
+    }
+    
+    // Fallback
+    throw Exception('Invalid AuthResult JSON structure: $json');
+  }
+
+  bool get isSuccess => succeeded && data != null;
+  bool get isFailure => !succeeded;
+}

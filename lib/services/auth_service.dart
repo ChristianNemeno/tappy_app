@@ -22,23 +22,29 @@ class AuthService {
       'ConfirmPassword': password,
     });
 
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      final data = json.decode(response.body);
-      final authResponse = AuthResponse.fromJson(data);
+    final data = json.decode(response.body);
+    final authResult = AuthResult.fromJson(data);
+    
+    if (authResult.isSuccess && authResult.data != null) {
+      final authResponse = authResult.data!;
       
-      await _saveToken(data['token'], data['expiresAt']);
+      await _saveToken(authResponse.token, authResponse.expiresAt.toIso8601String());
       await _saveUserData(
-        data['userId'],
-        data['email'],
-        data['userName'],
-        List<String>.from(data['roles'] ?? []),
+        authResponse.userId,
+        authResponse.email,
+        authResponse.userName,
+        authResponse.roles,
       );
-      _apiClient.setToken(data['token']);
+      _apiClient.setToken(authResponse.token);
       
       return authResponse;
     } else {
-      final error = json.decode(response.body);
-      throw Exception(error['Message'] ?? error['message'] ?? 'Registration failed');
+      // Build error message from AuthResult
+      String errorMsg = authResult.errorMessage ?? 'Registration failed';
+      if (authResult.errors != null && authResult.errors!.isNotEmpty) {
+        errorMsg += '\n${authResult.errors!.join('\n')}';
+      }
+      throw Exception(errorMsg);
     }
   }
 
@@ -48,25 +54,29 @@ class AuthService {
       'Password': password,
     });
     
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      final authResponse = AuthResponse.fromJson(data);
+    final data = json.decode(response.body);
+    final authResult = AuthResult.fromJson(data);
+    
+    if (authResult.isSuccess && authResult.data != null) {
+      final authResponse = authResult.data!;
       
-      await _saveToken(data['token'], data['expiresAt']);
+      await _saveToken(authResponse.token, authResponse.expiresAt.toIso8601String());
       await _saveUserData(
-        data['userId'],
-        data['email'],
-        data['userName'],
-        List<String>.from(data['roles'] ?? []),
+        authResponse.userId,
+        authResponse.email,
+        authResponse.userName,
+        authResponse.roles,
       );
-      _apiClient.setToken(data['token']);
+      _apiClient.setToken(authResponse.token);
       
       return authResponse;
-    } else if (response.statusCode == 401) {
-      throw Exception('Invalid email or password');
     } else {
-      final error = json.decode(response.body);
-      throw Exception(error['Message'] ?? error['message'] ?? 'Login failed');
+      // Build error message from AuthResult
+      String errorMsg = authResult.errorMessage ?? 'Login failed';
+      if (authResult.errors != null && authResult.errors!.isNotEmpty) {
+        errorMsg += '\n${authResult.errors!.join('\n')}';
+      }
+      throw Exception(errorMsg);
     }
   }
 
