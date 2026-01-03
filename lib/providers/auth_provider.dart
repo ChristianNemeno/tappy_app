@@ -84,7 +84,7 @@ class AuthProvider extends ChangeNotifier {
   void _setLoading(bool value) {
     _isLoading = value;
     if (value) {
-      _error = null;  // Only clear error when starting to load
+      _error = null;  
     }
     notifyListeners();
   }
