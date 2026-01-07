@@ -23,15 +23,18 @@ class QuizProvider extends ChangeNotifier {
    * QuizService and updates the state accordingly.
    */
   Future<void> fetchActiveQuizzes() async {
+    print('[INFO] QuizProvider: Starting to fetch active quizzes');
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
       _quizzes = await _quizService.getActiveQuizzes();
+      print('[SUCCESS] QuizProvider: Fetched ${_quizzes.length} active quizzes');
       _isLoading = false;
       notifyListeners();
     } catch (e) {
+      print('[ERROR] QuizProvider: Failed to fetch quizzes - $e');
       _error = e.toString();
       _isLoading = false;
       notifyListeners();
@@ -41,6 +44,7 @@ class QuizProvider extends ChangeNotifier {
   /** Refreshes the list of active quizzes 
    * by re-fetching them from the QuizService. */
   Future<void> refreshQuizzes() async {
+    print('[INFO] QuizProvider: Refresh requested');
     await fetchActiveQuizzes();
   }
 }

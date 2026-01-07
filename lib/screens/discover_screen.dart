@@ -14,9 +14,11 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() =>
-      context.read<QuizProvider>().fetchActiveQuizzes()
-    );
+    print('[INFO] DiscoverScreen: Initializing screen');
+    Future.microtask(() {
+      print('[DEBUG] DiscoverScreen: Fetching active quizzes');
+      return context.read<QuizProvider>().fetchActiveQuizzes();
+    });
   }
 
   @override
@@ -28,6 +30,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
+              print('[INFO] DiscoverScreen: User triggered manual refresh');
               context.read<QuizProvider>().refreshQuizzes();
             },
           ),
@@ -40,6 +43,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
           }
 
           if (provider.error != null && provider.quizzes.isEmpty) {
+            print('[ERROR] DiscoverScreen: Displaying error state - ${provider.error}');
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -49,7 +53,10 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                   Text(provider.error ?? 'An error occurred'),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () => provider.refreshQuizzes(),
+                    onPressed: () {
+                      print('[INFO] DiscoverScreen: User pressed retry button');
+                      provider.refreshQuizzes();
+                    },
                     child: const Text('Retry'),
                   ),
                 ],
@@ -58,6 +65,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
           }
 
           if (provider.quizzes.isEmpty) {
+            print('[INFO] DiscoverScreen: No quizzes available to display');
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -73,8 +81,12 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             );
           }
 
+          print('[INFO] DiscoverScreen: Displaying ${provider.quizzes.length} quizzes');
           return RefreshIndicator(
-            onRefresh: () => provider.refreshQuizzes(),
+            onRefresh: () {
+              print('[DEBUG] DiscoverScreen: Pull-to-refresh triggered');
+              return provider.refreshQuizzes();
+            },
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: provider.quizzes.length,
