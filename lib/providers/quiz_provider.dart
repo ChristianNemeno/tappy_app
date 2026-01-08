@@ -29,6 +29,7 @@ class QuizProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      print("[DEBUG] QuizProvider: Calling QuizService.getActiveQuizzes()");
       _quizzes = await _quizService.getActiveQuizzes();
       print('[SUCCESS] QuizProvider: Fetched ${_quizzes.length} active quizzes');
       _isLoading = false;

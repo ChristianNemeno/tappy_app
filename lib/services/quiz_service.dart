@@ -16,8 +16,12 @@ class QuizService {
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
+      print('[INFO] QuizService: Retrieved ${data.length} active quizzes');
+      print('[DEBUG] QuizService: Response data - ${response.body}');
       return data.map((json) => Quiz.fromJson(json)).toList();
     } else {
+      print('[ERROR] QuizService: Failed to fetch active quizzes - ${response.statusCode}');
+      print('[ERROR] Response body: ${response.body}');
       throw Exception('Failed to load quizzes');
     }
   }

@@ -2,7 +2,7 @@ class Quiz {
   final int id;
   final String title;
   final String description;
-  final int createdById;
+  final String createdById;
   final String createdByName;
   final bool isActive;
   final int questionCount;
