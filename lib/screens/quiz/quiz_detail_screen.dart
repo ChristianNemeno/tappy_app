@@ -24,10 +24,12 @@ class _QuizDetailScreenState extends State<QuizDetailScreen> {
   @override
   void initState() {
     super.initState();
+    print('[INFO] QuizDetailScreen: Screen initialized for quiz ${widget.quizId}');
     _loadQuizDetails();
   }
 
   Future<void> _loadQuizDetails() async {
+    print('[DEBUG] QuizDetailScreen: Loading quiz details');
     setState(() {
       _isLoading = true;
       _error = null;
@@ -36,6 +38,7 @@ class _QuizDetailScreenState extends State<QuizDetailScreen> {
     try {
       final quizService = context.read<QuizService>();
       final quiz = await quizService.getQuizById(widget.quizId);
+      print('[SUCCESS] QuizDetailScreen: Loaded quiz details - ${quiz.title}');
       
       if (mounted) {
         setState(() {
@@ -44,6 +47,7 @@ class _QuizDetailScreenState extends State<QuizDetailScreen> {
         });
       }
     } catch (e) {
+      print('[ERROR] QuizDetailScreen: Failed to load quiz - $e');
       if (mounted) {
         setState(() {
           _error = e.toString();
@@ -54,6 +58,7 @@ class _QuizDetailScreenState extends State<QuizDetailScreen> {
   }
 
   Future<void> _startQuiz() async {
+    print('[DEBUG] QuizDetailScreen: Start quiz button pressed');
     if (_quiz == null) return;
 
     final confirm = await showDialog<bool>(

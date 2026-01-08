@@ -20,7 +20,9 @@ class _AddQuestionsScreenState extends State<AddQuestionsScreen> {
   @override
   void initState() {
     super.initState();
+    print('[INFO] AddQuestionsScreen: Screen initialized');
     if (widget.initialQuestions.isNotEmpty) {
+      print('[DEBUG] AddQuestionsScreen: Loading ${widget.initialQuestions.length} existing questions');
       _questions.addAll(
         widget.initialQuestions.map((q) => _QuestionBuilder.fromDto(q)),
       );
@@ -116,8 +118,10 @@ class _AddQuestionsScreenState extends State<AddQuestionsScreen> {
   }
 
   void _saveQuestions() {
+    print('[DEBUG] AddQuestionsScreen: Saving questions');
     if (!_validateAll()) return;
 
+    print('[SUCCESS] AddQuestionsScreen: Validation passed, saving ${_questions.length} questions');
     final questions = _questions.map((q) => q.toDto()).toList();
     Navigator.pop(context, questions);
   }

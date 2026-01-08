@@ -35,6 +35,9 @@ class QuizResultScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('[INFO] QuizResultScreen: Displaying results');
+    print('[DEBUG] QuizResultScreen: Score - ${result.score}/${result.totalQuestions} (${result.percentage.toStringAsFixed(1)}%)');
+    print('[DEBUG] QuizResultScreen: Correct: ${result.correctAnswers}, Incorrect: ${result.incorrectAnswers}');
     final scoreColor = _getScoreColor(result.percentage);
 
     return Scaffold(

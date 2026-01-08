@@ -30,6 +30,8 @@ class _DetailedReviewScreenState extends State<DetailedReviewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print('[INFO] DetailedReviewScreen: Displaying detailed review');
+    print('[DEBUG] DetailedReviewScreen: Filter mode: $_filterMode, Questions shown: ${_filteredQuestions.length}');
     return Scaffold(
       appBar: AppBar(
         title: const Text('Detailed Review'),

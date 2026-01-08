@@ -7,6 +7,7 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('[INFO] ProfileScreen: Building screen');
     final authProvider = Provider.of<AuthProvider>(context);
     final user = authProvider.authData;
 
@@ -69,6 +70,7 @@ class ProfileScreen extends StatelessWidget {
             leading: const Icon(Icons.logout, color: Colors.red),
             title: const Text('Logout', style: TextStyle(color: Colors.red)),
             onTap: () async {
+              print('[DEBUG] ProfileScreen: Logout button tapped');
               final confirm = await showDialog<bool>(
                 context: context,
                 builder: (context) => AlertDialog(

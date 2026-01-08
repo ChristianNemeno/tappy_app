@@ -21,10 +21,12 @@ class _MyQuizzesScreenState extends State<MyQuizzesScreen> {
   @override
   void initState() {
     super.initState();
+    print('[INFO] MyQuizzesScreen: Screen initialized');
     _loadQuizzes();
   }
 
   Future<void> _loadQuizzes() async {
+    print('[DEBUG] MyQuizzesScreen: Loading user quizzes');
     setState(() {
       _isLoading = true;
       _error = null;
@@ -34,6 +36,7 @@ class _MyQuizzesScreenState extends State<MyQuizzesScreen> {
       final quizService = context.read<QuizService>();
       final quizzes = await quizService.getMyQuizzes();
 
+      print('[SUCCESS] MyQuizzesScreen: Loaded ${quizzes.length} quizzes');
       if (mounted) {
         setState(() {
           _quizzes = quizzes;
@@ -41,6 +44,7 @@ class _MyQuizzesScreenState extends State<MyQuizzesScreen> {
         });
       }
     } catch (e) {
+      print('[ERROR] MyQuizzesScreen: Failed to load quizzes - $e');
       if (mounted) {
         setState(() {
           _error = e.toString().replaceAll('Exception: ', '');
@@ -51,9 +55,11 @@ class _MyQuizzesScreenState extends State<MyQuizzesScreen> {
   }
 
   Future<void> _toggleQuizStatus(Quiz quiz) async {
+    print('[DEBUG] MyQuizzesScreen: Toggling status for quiz ${quiz.id}');
     try {
       final quizService = context.read<QuizService>();
       await quizService.toggleQuizStatus(quiz.id);
+      print('[SUCCESS] MyQuizzesScreen: Quiz status toggled');
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

@@ -27,6 +27,8 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
   @override
   void initState() {
     super.initState();
+    print('[INFO] QuizTakingScreen: Screen initialized for quiz ${widget.quiz.id}');
+    print('[DEBUG] QuizTakingScreen: Total questions: ${widget.questions.length}');
     _initializeAttempt();
   }
 
@@ -37,11 +39,18 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
   }
 
   Future<void> _initializeAttempt() async {
+    print('[DEBUG] QuizTakingScreen: Initializing quiz attempt');
     final provider = context.read<AttemptProvider>();
     final success = await provider.startAttempt(
       widget.quiz.id,
       widget.questions,
     );
+
+    if (success) {
+      print('[SUCCESS] QuizTakingScreen: Attempt started successfully');
+    } else {
+      print('[ERROR] QuizTakingScreen: Failed to start attempt');
+    }
 
     if (!success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -60,6 +69,7 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
   }
 
   void _onPageChanged(int index) {
+    print('[DEBUG] QuizTakingScreen: Navigated to question ${index + 1}');
     setState(() {
       _currentQuestionIndex = index;
     });
@@ -86,10 +96,12 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
   }
 
   Future<void> _showSubmitDialog() async {
+    print('[DEBUG] QuizTakingScreen: Submit button pressed');
     final provider = context.read<AttemptProvider>();
     
     // Check if all questions are answered
     final validationError = provider.validateCompletion();
+    print('[DEBUG] QuizTakingScreen: Answered ${provider.answeredCount}/${provider.totalQuestions} questions');
     
     if (validationError != null) {
       // Show warning about unanswered questions

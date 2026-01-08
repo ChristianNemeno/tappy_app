@@ -13,6 +13,12 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    print('[INFO] MainShell: App shell initialized');
+  }
+
   final List<Widget> _screens = [
     const DiscoverScreen(),
     const MyAttemptsScreen(),
@@ -25,7 +31,11 @@ class _MainShellState extends State<MainShell> {
       body: _screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
+        onTap: (index) {
+          final screenNames = ['Discover', 'My Attempts', 'Profile'];
+          print('[DEBUG] MainShell: Navigating to ${screenNames[index]} tab');
+          setState(() => _currentIndex = index);
+        },
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.explore),

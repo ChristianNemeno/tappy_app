@@ -15,6 +15,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+    print('[INFO] RegisterScreen: Screen initialized');
+  }
+
  @override
   void dispose() {
     _usernameController.dispose();
@@ -24,14 +30,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _register() async {
-    print('🔘 Register button pressed');
+    print('[DEBUG] RegisterScreen: Register button pressed');
     
     if (!_formKey.currentState!.validate()) {
-      print('❌ Form validation failed');
+      print('[DEBUG] RegisterScreen: Form validation failed');
       return;
     }
 
-    print('✅ Form validation passed');
+    print('[DEBUG] RegisterScreen: Form validation passed');
+    print('[INFO] RegisterScreen: Attempting registration for ${_usernameController.text.trim()}');
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final success = await authProvider.register(
       _usernameController.text.trim(),
@@ -40,8 +47,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
 
     if (success) {
+      print('[SUCCESS] RegisterScreen: Registration successful');
       if (mounted) Navigator.of(context).pop();
     } else {
+      print('[ERROR] RegisterScreen: Registration failed - ${authProvider.error}');
       if (mounted) {
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()

@@ -27,10 +27,12 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   @override
   void initState() {
     super.initState();
+    print('[INFO] LeaderboardScreen: Screen initialized for quiz ${widget.quizId}');
     _loadLeaderboard();
   }
 
   Future<void> _loadLeaderboard() async {
+    print('[DEBUG] LeaderboardScreen: Loading top $_topCount entries');
     setState(() {
       _isLoading = true;
       _error = null;
@@ -43,6 +45,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
         topCount: _topCount,
       );
 
+      print('[SUCCESS] LeaderboardScreen: Loaded ${entries.length} leaderboard entries');
       if (mounted) {
         setState(() {
           _entries = entries;
@@ -50,6 +53,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
         });
       }
     } catch (e) {
+      print('[ERROR] LeaderboardScreen: Failed to load leaderboard - $e');
       if (mounted) {
         setState(() {
           _error = e.toString().replaceAll('Exception: ', '');

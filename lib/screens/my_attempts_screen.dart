@@ -20,10 +20,12 @@ class _MyAttemptsScreenState extends State<MyAttemptsScreen> {
   @override
   void initState() {
     super.initState();
+    print('[INFO] MyAttemptsScreen: Screen initialized');
     _loadAttempts();
   }
 
   Future<void> _loadAttempts() async {
+    print('[DEBUG] MyAttemptsScreen: Loading user attempts');
     setState(() {
       _isLoading = true;
       _error = null;
@@ -32,6 +34,7 @@ class _MyAttemptsScreenState extends State<MyAttemptsScreen> {
     try {
       final attemptService = context.read<AttemptService>();
       final attempts = await attemptService.getUserAttempts();
+      print('[SUCCESS] MyAttemptsScreen: Loaded ${attempts.length} attempts');
       
       if (mounted) {
         setState(() {
@@ -40,6 +43,7 @@ class _MyAttemptsScreenState extends State<MyAttemptsScreen> {
         });
       }
     } catch (e) {
+      print('[ERROR] MyAttemptsScreen: Failed to load attempts - $e');
       if (mounted) {
         setState(() {
           _error = e.toString().replaceAll('Exception: ', '');
@@ -50,7 +54,9 @@ class _MyAttemptsScreenState extends State<MyAttemptsScreen> {
   }
 
   Future<void> _viewResult(QuizAttempt attempt) async {
+    print('[DEBUG] MyAttemptsScreen: Viewing result for attempt ${attempt.id}');
     if (!attempt.isCompleted) {
+      print('[DEBUG] MyAttemptsScreen: Attempt is not completed');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('This attempt is not yet completed'),

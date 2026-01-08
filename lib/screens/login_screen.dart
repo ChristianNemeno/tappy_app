@@ -16,6 +16,12 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    print('[INFO] LoginScreen: Screen initialized');
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
@@ -23,13 +29,24 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
-    if (!_formKey.currentState!.validate()) return;
+    print('[DEBUG] LoginScreen: Login button pressed');
+    if (!_formKey.currentState!.validate()) {
+      print('[DEBUG] LoginScreen: Form validation failed');
+      return;
+    }
 
+    print('[INFO] LoginScreen: Attempting login for ${_emailController.text.trim()}');
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final success = await authProvider.login(
       _emailController.text.trim(),
       _passwordController.text.trim(),
     );
+
+    if (success) {
+      print('[SUCCESS] LoginScreen: Login successful');
+    } else {
+      print('[ERROR] LoginScreen: Login failed - ${authProvider.error}');
+    }
 
     if (!success && mounted) {
       ScaffoldMessenger.of(context)

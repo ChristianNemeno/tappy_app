@@ -22,6 +22,12 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
   bool _isCreating = false;
 
   @override
+  void initState() {
+    super.initState();
+    print('[INFO] CreateQuizScreen: Screen initialized');
+  }
+
+  @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
@@ -29,6 +35,7 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
   }
 
   Future<void> _addQuestions() async {
+    print('[DEBUG] CreateQuizScreen: Opening add questions screen');
     if (!_formKey.currentState!.validate()) return;
 
     final result = await Navigator.push<List<CreateQuestionDto>>(
@@ -48,9 +55,14 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
   }
 
   Future<void> _createQuiz() async {
-    if (!_formKey.currentState!.validate()) return;
+    print('[DEBUG] CreateQuizScreen: Attempting to create quiz');
+    if (!_formKey.currentState!.validate()) {
+      print('[DEBUG] CreateQuizScreen: Form validation failed');
+      return;
+    }
 
     if (_questions.isEmpty) {
+      print('[DEBUG] CreateQuizScreen: No questions added');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please add at least one question'),
@@ -72,7 +84,9 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
         questions: _questions,
       );
 
+      print('[INFO] CreateQuizScreen: Creating quiz with ${_questions.length} questions');
       await quizService.createQuiz(dto);
+      print('[SUCCESS] CreateQuizScreen: Quiz created successfully');
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -84,6 +98,7 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
         Navigator.pop(context, true);
       }
     } catch (e) {
+      print('[ERROR] CreateQuizScreen: Failed to create quiz - $e');
       if (mounted) {
         setState(() {
           _isCreating = false;

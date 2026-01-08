@@ -26,6 +26,7 @@ class _EditQuizScreenState extends State<EditQuizScreen> {
   @override
   void initState() {
     super.initState();
+    print('[INFO] EditQuizScreen: Screen initialized for quiz ${widget.quiz.id}');
     _titleController = TextEditingController(text: widget.quiz.title);
     _descriptionController = TextEditingController(text: widget.quiz.description);
     _isActive = widget.quiz.isActive;
@@ -39,8 +40,13 @@ class _EditQuizScreenState extends State<EditQuizScreen> {
   }
 
   Future<void> _updateQuiz() async {
-    if (!_formKey.currentState!.validate()) return;
+    print('[DEBUG] EditQuizScreen: Attempting to update quiz');
+    if (!_formKey.currentState!.validate()) {
+      print('[DEBUG] EditQuizScreen: Form validation failed');
+      return;
+    }
 
+    print('[INFO] EditQuizScreen: Updating quiz ${widget.quiz.id}');
     setState(() {
       _isUpdating = true;
     });
@@ -54,6 +60,7 @@ class _EditQuizScreenState extends State<EditQuizScreen> {
       );
 
       await quizService.updateQuiz(widget.quiz.id, dto);
+      print('[SUCCESS] EditQuizScreen: Quiz updated successfully');
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -65,6 +72,7 @@ class _EditQuizScreenState extends State<EditQuizScreen> {
         Navigator.pop(context, true);
       }
     } catch (e) {
+      print('[ERROR] EditQuizScreen: Failed to update quiz - $e');
       if (mounted) {
         setState(() {
           _isUpdating = false;
