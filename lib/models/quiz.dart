@@ -2,11 +2,11 @@ class Quiz {
   final int id;
   final String title;
   final String description;
+  final DateTime createdAt;
   final String createdById;
   final String createdByName;
   final bool isActive;
   final int questionCount;
-  final DateTime createdAt;
 
   Quiz({
     required this.id,

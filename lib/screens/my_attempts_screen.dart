@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/attempt_provider.dart';
 import '../models/quiz_attempt.dart';
 import '../services/attempt_service.dart';
 import 'quiz/quiz_result_screen.dart';
@@ -35,7 +34,7 @@ class _MyAttemptsScreenState extends State<MyAttemptsScreen> {
       final attemptService = context.read<AttemptService>();
       final attempts = await attemptService.getUserAttempts();
       print('[SUCCESS] MyAttemptsScreen: Loaded ${attempts.length} attempts');
-      
+
       if (mounted) {
         setState(() {
           _attempts = attempts;
@@ -57,10 +56,14 @@ class _MyAttemptsScreenState extends State<MyAttemptsScreen> {
     print('[DEBUG] MyAttemptsScreen: Viewing result for attempt ${attempt.id}');
     if (!attempt.isCompleted) {
       print('[DEBUG] MyAttemptsScreen: Attempt is not completed');
+      final colors = Theme.of(context).colorScheme;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('This attempt is not yet completed'),
-          backgroundColor: Colors.orange,
+        SnackBar(
+          backgroundColor: colors.tertiaryContainer,
+          content: Text(
+            'This attempt is not yet completed',
+            style: TextStyle(color: colors.onTertiaryContainer),
+          ),
         ),
       );
       return;
@@ -111,9 +114,12 @@ class _MyAttemptsScreenState extends State<MyAttemptsScreen> {
 
       // Show error
       ScaffoldMessenger.of(context).showSnackBar(
+        // Keep messaging identical; use theme-driven colors.
         SnackBar(
-          content: Text('Failed to load results: ${e.toString().replaceAll('Exception: ', '')}'),
-          backgroundColor: Colors.red,
+          content: Text(
+            'Failed to load results: ${e.toString().replaceAll('Exception: ', '')}',
+          ),
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     }
@@ -125,10 +131,7 @@ class _MyAttemptsScreenState extends State<MyAttemptsScreen> {
       appBar: AppBar(
         title: const Text('My Attempts'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadAttempts,
-          ),
+          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadAttempts),
         ],
       ),
       body: _buildBody(),
@@ -141,11 +144,12 @@ class _MyAttemptsScreenState extends State<MyAttemptsScreen> {
     }
 
     if (_error != null) {
+      final colors = Theme.of(context).colorScheme;
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 60, color: Colors.red),
+            Icon(Icons.error_outline, size: 60, color: colors.error),
             const SizedBox(height: 16),
             Text(
               'Failed to load attempts',
@@ -169,21 +173,24 @@ class _MyAttemptsScreenState extends State<MyAttemptsScreen> {
     }
 
     if (_attempts.isEmpty) {
+      final theme = Theme.of(context);
+      final colors = theme.colorScheme;
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.history, size: 80, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text(
-              'No attempts yet',
-              style: Theme.of(context).textTheme.titleMedium,
+            Icon(
+              Icons.history,
+              size: 80,
+              color: colors.onSurfaceVariant.withOpacity(0.45),
             ),
+            const SizedBox(height: 16),
+            Text('No attempts yet', style: theme.textTheme.titleMedium),
             const SizedBox(height: 8),
             Text(
               'Take a quiz to see your history',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colors.onSurfaceVariant,
               ),
             ),
           ],
@@ -212,24 +219,34 @@ class _AttemptCard extends StatelessWidget {
   final QuizAttempt attempt;
   final VoidCallback onTap;
 
-  const _AttemptCard({
-    required this.attempt,
-    required this.onTap,
-  });
+  const _AttemptCard({required this.attempt, required this.onTap});
 
-  Color _getScoreColor(double score) {
-    if (score >= 80) return Colors.green;
-    if (score >= 60) return Colors.orange;
-    return Colors.red;
+  Color _scoreColor(ColorScheme colors, double score) {
+    if (score >= 80) return colors.primary;
+    if (score >= 60) return colors.tertiary;
+    return colors.error;
+  }
+
+  BorderRadius _resolveCardRadius(BuildContext context) {
+    final shape = Theme.of(context).cardTheme.shape;
+    if (shape is RoundedRectangleBorder) {
+      return shape.borderRadius.resolve(Directionality.of(context));
+    }
+    return BorderRadius.circular(16);
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final cardRadius = _resolveCardRadius(context);
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: attempt.isCompleted ? onTap : null,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: cardRadius,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -240,50 +257,44 @@ class _AttemptCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       attempt.quizTitle,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
                   if (attempt.isCompleted)
-                    Container(
+                    Chip(
+                      label: Text('${attempt.score.toStringAsFixed(1)}%'),
+                      backgroundColor: _scoreColor(
+                        colors,
+                        attempt.score,
+                      ).withOpacity(0.16),
+                      labelStyle: theme.textTheme.labelMedium?.copyWith(
+                        color: _scoreColor(colors, attempt.score),
+                        fontWeight: FontWeight.w800,
+                      ),
+                      side: BorderSide(
+                        color: _scoreColor(colors, attempt.score),
+                      ),
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _getScoreColor(attempt.score).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: _getScoreColor(attempt.score),
-                        ),
-                      ),
-                      child: Text(
-                        '${attempt.score.toStringAsFixed(1)}%',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: _getScoreColor(attempt.score),
-                        ),
+                        horizontal: 6,
+                        vertical: 2,
                       ),
                     ),
                   if (!attempt.isCompleted)
-                    Container(
+                    Chip(
+                      label: const Text('Incomplete'),
+                      backgroundColor: colors.onSurfaceVariant.withOpacity(
+                        0.10,
+                      ),
+                      labelStyle: theme.textTheme.labelMedium?.copyWith(
+                        color: colors.onSurfaceVariant,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      side: BorderSide(color: colors.outlineVariant),
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.grey),
-                      ),
-                      child: const Text(
-                        'Incomplete',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey,
-                        ),
+                        horizontal: 6,
+                        vertical: 2,
                       ),
                     ),
                 ],
@@ -291,23 +302,29 @@ class _AttemptCard extends StatelessWidget {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Icon(Icons.calendar_today, size: 16, color: Colors.grey[600]),
+                  Icon(
+                    Icons.calendar_today,
+                    size: 16,
+                    color: colors.onSurfaceVariant,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     _formatDate(attempt.startedAt),
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colors.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(width: 16),
-                  Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
+                  Icon(
+                    Icons.access_time,
+                    size: 16,
+                    color: colors.onSurfaceVariant,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     _formatTime(attempt.startedAt),
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[600],
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colors.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -316,13 +333,16 @@ class _AttemptCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Icon(Icons.check_circle, size: 16, color: Colors.grey[600]),
+                    Icon(
+                      Icons.check_circle,
+                      size: 16,
+                      color: colors.onSurfaceVariant,
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       'Completed on ${_formatDate(attempt.completedAt!)}',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colors.onSurfaceVariant,
                       ),
                     ),
                   ],
