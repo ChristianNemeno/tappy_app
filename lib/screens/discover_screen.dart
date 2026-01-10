@@ -23,6 +23,9 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Discover Quizzes'),
@@ -43,14 +46,20 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
           }
 
           if (provider.error != null && provider.quizzes.isEmpty) {
-            print('[ERROR] DiscoverScreen: Displaying error state - ${provider.error}');
+            print(
+              '[ERROR] DiscoverScreen: Displaying error state - ${provider.error}',
+            );
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline, size: 60, color: Colors.red),
+                  Icon(Icons.error_outline, size: 60, color: colors.error),
                   const SizedBox(height: 16),
-                  Text(provider.error ?? 'An error occurred'),
+                  Text(
+                    provider.error ?? 'An error occurred',
+                    style: theme.textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
+                  ),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
@@ -70,25 +79,32 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.quiz, size: 80, color: Colors.grey[400]),
+                  Icon(
+                    Icons.quiz,
+                    size: 80,
+                    color: colors.onSurfaceVariant.withOpacity(0.45),
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     'No quizzes available',
-                    style: Theme.of(context).textTheme.titleMedium,
+                    style: theme.textTheme.titleMedium,
                   ),
                 ],
               ),
             );
           }
 
-          print('[INFO] DiscoverScreen: Displaying ${provider.quizzes.length} quizzes');
+          print(
+            '[INFO] DiscoverScreen: Displaying ${provider.quizzes.length} quizzes',
+          );
           return RefreshIndicator(
             onRefresh: () {
               print('[DEBUG] DiscoverScreen: Pull-to-refresh triggered');
               return provider.refreshQuizzes();
             },
             child: ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+              physics: const AlwaysScrollableScrollPhysics(),
               itemCount: provider.quizzes.length,
               itemBuilder: (context, index) {
                 return QuizCard(quiz: provider.quizzes[index]);
