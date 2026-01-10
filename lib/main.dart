@@ -9,6 +9,7 @@ import 'package:tappy_app/services/quiz_service.dart';
 import 'package:tappy_app/utils/api_client.dart';
 import 'package:tappy_app/providers/attempt_provider.dart';
 import 'package:tappy_app/services/attempt_service.dart';
+import 'package:tappy_app/theme/app_theme.dart';
 
 void main() {
   runApp(
@@ -25,19 +26,13 @@ void main() {
           update: (_, client, __) => AttemptService(client),
         ),
         ChangeNotifierProvider(
-          create: (context) => AuthProvider(
-            context.read<AuthService>(),
-          ),
+          create: (context) => AuthProvider(context.read<AuthService>()),
         ),
         ChangeNotifierProvider(
-          create: (context) => QuizProvider(
-            context.read<QuizService>(),
-          ),
+          create: (context) => QuizProvider(context.read<QuizService>()),
         ),
-        ChangeNotifierProvider( 
-          create: (context) => AttemptProvider(
-            context.read<AttemptService>(),
-          ),
+        ChangeNotifierProvider(
+          create: (context) => AttemptProvider(context.read<AttemptService>()),
         ),
       ],
       child: const MyApp(),
@@ -52,12 +47,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'TAPCET Quiz',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color.fromARGB(255, 4, 80, 2),
-        ),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.lightTheme,
       home: Consumer<AuthProvider>(
         builder: (context, auth, _) {
           if (auth.isLoading) {
