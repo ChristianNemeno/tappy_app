@@ -23,7 +23,7 @@ class _MyQuizzesScreenState extends State<MyQuizzesScreen> {
     super.initState();
     print('[INFO] MyQuizzesScreen: Screen initialized');
     _loadQuizzes();
-  }
+  } // no error here
 
   Future<void> _loadQuizzes() async {
     print('[DEBUG] MyQuizzesScreen: Loading user quizzes');
@@ -62,6 +62,7 @@ class _MyQuizzesScreenState extends State<MyQuizzesScreen> {
       print('[SUCCESS] MyQuizzesScreen: Quiz status toggled');
 
       if (mounted) {
+        final colors = Theme.of(context).colorScheme;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -69,17 +70,18 @@ class _MyQuizzesScreenState extends State<MyQuizzesScreen> {
                   ? 'Quiz deactivated successfully'
                   : 'Quiz activated successfully',
             ),
-            backgroundColor: Colors.green,
+            backgroundColor: colors.primaryContainer,
           ),
         );
         _loadQuizzes();
       }
     } catch (e) {
       if (mounted) {
+        final colors = Theme.of(context).colorScheme;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(e.toString().replaceAll('Exception: ', '')),
-            backgroundColor: Colors.red,
+            backgroundColor: colors.error,
           ),
         );
       }
@@ -99,9 +101,11 @@ class _MyQuizzesScreenState extends State<MyQuizzesScreen> {
             onPressed: () => Navigator.pop(context, false),
             child: const Text('Cancel'),
           ),
-          ElevatedButton(
+          TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
             child: const Text('Delete'),
           ),
         ],
@@ -115,20 +119,22 @@ class _MyQuizzesScreenState extends State<MyQuizzesScreen> {
       await quizService.deleteQuiz(quiz.id);
 
       if (mounted) {
+        final colors = Theme.of(context).colorScheme;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Quiz deleted successfully'),
-            backgroundColor: Colors.green,
+          SnackBar(
+            content: const Text('Quiz deleted successfully'),
+            backgroundColor: colors.primaryContainer,
           ),
         );
         _loadQuizzes();
       }
     } catch (e) {
       if (mounted) {
+        final colors = Theme.of(context).colorScheme;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(e.toString().replaceAll('Exception: ', '')),
-            backgroundColor: Colors.red,
+            backgroundColor: colors.error,
           ),
         );
       }
@@ -141,10 +147,7 @@ class _MyQuizzesScreenState extends State<MyQuizzesScreen> {
       appBar: AppBar(
         title: const Text('My Quizzes'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadQuizzes,
-          ),
+          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadQuizzes),
         ],
       ),
       body: _buildBody(),
@@ -152,9 +155,7 @@ class _MyQuizzesScreenState extends State<MyQuizzesScreen> {
         onPressed: () async {
           final result = await Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const CreateQuizScreen(),
-            ),
+            MaterialPageRoute(builder: (context) => const CreateQuizScreen()),
           );
           if (result == true) {
             _loadQuizzes();
@@ -167,6 +168,9 @@ class _MyQuizzesScreenState extends State<MyQuizzesScreen> {
   }
 
   Widget _buildBody() {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -176,17 +180,14 @@ class _MyQuizzesScreenState extends State<MyQuizzesScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 60, color: Colors.red),
+            Icon(Icons.error_outline, size: 60, color: colors.error),
             const SizedBox(height: 16),
-            Text(
-              'Failed to load quizzes',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            Text('Failed to load quizzes', style: theme.textTheme.titleLarge),
             const SizedBox(height: 8),
             Text(
               _error!,
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: theme.textTheme.bodyMedium,
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
@@ -204,18 +205,19 @@ class _MyQuizzesScreenState extends State<MyQuizzesScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.quiz, size: 80, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text(
-              'No quizzes yet',
-              style: Theme.of(context).textTheme.titleMedium,
+            Icon(
+              Icons.quiz,
+              size: 80,
+              color: colors.onSurfaceVariant.withOpacity(0.45),
             ),
+            const SizedBox(height: 16),
+            Text('No quizzes yet', style: theme.textTheme.titleMedium),
             const SizedBox(height: 8),
             Text(
               'Create your first quiz!',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey,
-                  ),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colors.onSurfaceVariant,
+              ),
             ),
           ],
         ),
@@ -274,13 +276,26 @@ class _QuizManagementCard extends StatelessWidget {
     required this.onDelete,
   });
 
+  BorderRadius _resolveCardRadius(BuildContext context) {
+    final shape = Theme.of(context).cardTheme.shape;
+    if (shape is RoundedRectangleBorder) {
+      return shape.borderRadius.resolve(Directionality.of(context));
+    }
+    return BorderRadius.circular(16);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final cardRadius = _resolveCardRadius(context);
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: cardRadius,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -294,18 +309,16 @@ class _QuizManagementCard extends StatelessWidget {
                       children: [
                         Text(
                           quiz.title,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                         if (quiz.description.isNotEmpty) ...[
                           const SizedBox(height: 4),
                           Text(
                             quiz.description,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[600],
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colors.onSurfaceVariant,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -315,27 +328,25 @@ class _QuizManagementCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
+                  Chip(
+                    label: Text(quiz.isActive ? 'Active' : 'Inactive'),
+                    backgroundColor: quiz.isActive
+                        ? colors.primaryContainer
+                        : colors.onSurfaceVariant.withOpacity(0.10),
+                    labelStyle: theme.textTheme.labelMedium?.copyWith(
                       color: quiz.isActive
-                          ? Colors.green.withOpacity(0.1)
-                          : Colors.grey.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: quiz.isActive ? Colors.green : Colors.grey,
-                      ),
+                          ? colors.onPrimaryContainer
+                          : colors.onSurfaceVariant,
+                      fontWeight: FontWeight.w800,
                     ),
-                    child: Text(
-                      quiz.isActive ? 'Active' : 'Inactive',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: quiz.isActive ? Colors.green : Colors.grey,
-                      ),
+                    side: BorderSide(
+                      color: quiz.isActive
+                          ? colors.primary
+                          : colors.outlineVariant,
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
                     ),
                   ),
                 ],
@@ -343,18 +354,26 @@ class _QuizManagementCard extends StatelessWidget {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Icon(Icons.quiz, size: 16, color: Colors.grey[600]),
+                  Icon(Icons.quiz, size: 16, color: colors.onSurfaceVariant),
                   const SizedBox(width: 4),
                   Text(
                     '${quiz.questionCount} questions',
-                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colors.onSurfaceVariant,
+                    ),
                   ),
                   const SizedBox(width: 16),
-                  Icon(Icons.calendar_today, size: 16, color: Colors.grey[600]),
+                  Icon(
+                    Icons.calendar_today,
+                    size: 16,
+                    color: colors.onSurfaceVariant,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     _formatDate(quiz.createdAt),
-                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colors.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -377,8 +396,11 @@ class _QuizManagementCard extends StatelessWidget {
                   ),
                   TextButton.icon(
                     onPressed: onDelete,
-                    icon: const Icon(Icons.delete, size: 18, color: Colors.red),
-                    label: const Text('Delete', style: TextStyle(color: Colors.red)),
+                    icon: Icon(Icons.delete, size: 18, color: colors.error),
+                    label: Text(
+                      'Delete',
+                      style: TextStyle(color: colors.error),
+                    ),
                   ),
                 ],
               ),
