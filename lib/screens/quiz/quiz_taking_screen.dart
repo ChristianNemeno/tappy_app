@@ -29,7 +29,7 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
     super.initState();
     print('[INFO] QuizTakingScreen: Screen initialized for quiz ${widget.quiz.id}');
     print('[DEBUG] QuizTakingScreen: Total questions: ${widget.questions.length}');
-    _initializeAttempt();
+    Future.microtask(() => _initializeAttempt());
   }
 
   @override
