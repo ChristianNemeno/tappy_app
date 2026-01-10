@@ -9,9 +9,16 @@ class QuizCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final cardRadius = _resolveCardRadius(context);
+    final metaColor = colors.onSurfaceVariant;
+
     return Card(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 12),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
+        borderRadius: cardRadius,
         onTap: () {
           Navigator.push(
             context,
@@ -31,37 +38,48 @@ class QuizCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       quiz.title,
-                      style: Theme.of(context).textTheme.titleLarge,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                   Chip(
                     label: Text('${quiz.questionCount} Qs'),
-                    backgroundColor: Colors.blue.shade100,
+                    backgroundColor: colors.primaryContainer,
+                    labelStyle: theme.textTheme.labelMedium?.copyWith(
+                      color: colors.onPrimaryContainer,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    side: BorderSide.none,
                   ),
                 ],
               ),
               const SizedBox(height: 8),
               Text(
                 quiz.description,
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: theme.textTheme.bodyMedium,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Icon(Icons.person, size: 16, color: Colors.grey[600]),
+                  Icon(Icons.person, size: 16, color: metaColor),
                   const SizedBox(width: 4),
                   Text(
                     quiz.createdByName,
-                    style: TextStyle(color: Colors.grey[600]),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: metaColor,
+                    ),
                   ),
                   const Spacer(),
-                  Icon(Icons.calendar_today, size: 16, color: Colors.grey[600]),
+                  Icon(Icons.calendar_today, size: 16, color: metaColor),
                   const SizedBox(width: 4),
                   Text(
                     _formatDate(quiz.createdAt),
-                    style: TextStyle(color: Colors.grey[600]),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: metaColor,
+                    ),
                   ),
                 ],
               ),
@@ -70,6 +88,14 @@ class QuizCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  BorderRadius _resolveCardRadius(BuildContext context) {
+    final shape = Theme.of(context).cardTheme.shape;
+    if (shape is RoundedRectangleBorder) {
+      return shape.borderRadius.resolve(Directionality.of(context));
+    }
+    return BorderRadius.circular(16);
   }
 
   String _formatDate(DateTime date) {
@@ -82,4 +108,3 @@ class QuizCard extends StatelessWidget {
     return '${date.day}/${date.month}/${date.year}';
   }
 }
-
