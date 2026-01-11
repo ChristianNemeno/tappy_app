@@ -3,6 +3,11 @@ import 'package:provider/provider.dart';
 import '../models/quiz_attempt.dart';
 import '../services/attempt_service.dart';
 import 'quiz/quiz_result_screen.dart';
+import 'package:tappy_app/widgets/design/buttons.dart';
+import 'package:tappy_app/widgets/design/fixed_width_container.dart';
+import 'package:tappy_app/widgets/design/inline_message_banner.dart';
+import 'package:tappy_app/widgets/design/pill_tag.dart';
+import 'package:tappy_app/widgets/design/surface_card.dart';
 
 class MyAttemptsScreen extends StatefulWidget {
   const MyAttemptsScreen({super.key});
@@ -144,29 +149,18 @@ class _MyAttemptsScreenState extends State<MyAttemptsScreen> {
     }
 
     if (_error != null) {
-      final colors = Theme.of(context).colorScheme;
-      return Center(
+      return _CenteredPanel(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Icon(Icons.error_outline, size: 60, color: colors.error),
-            const SizedBox(height: 16),
-            Text(
-              'Failed to load attempts',
-              style: Theme.of(context).textTheme.titleLarge,
+            InlineMessageBanner(
+              title: 'Failed to load attempts',
+              message: _error!,
+              variant: InlineMessageVariant.error,
             ),
-            const SizedBox(height: 8),
-            Text(
-              _error!,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: _loadAttempts,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
-            ),
+            const SizedBox(height: 12),
+            PrimaryButton(label: 'Retry', onPressed: _loadAttempts),
           ],
         ),
       );
@@ -175,22 +169,37 @@ class _MyAttemptsScreenState extends State<MyAttemptsScreen> {
     if (_attempts.isEmpty) {
       final theme = Theme.of(context);
       final colors = theme.colorScheme;
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+      return RefreshIndicator(
+        onRefresh: _loadAttempts,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.zero,
           children: [
-            Icon(
-              Icons.history,
-              size: 80,
-              color: colors.onSurfaceVariant.withOpacity(0.45),
-            ),
-            const SizedBox(height: 16),
-            Text('No attempts yet', style: theme.textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Text(
-              'Take a quiz to see your history',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: colors.onSurfaceVariant,
+            SizedBox(height: MediaQuery.sizeOf(context).height * 0.15),
+            _CenteredPanel(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.history,
+                    size: 72,
+                    color: colors.onSurfaceVariant.withAlpha(115),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'No attempts yet',
+                    style: theme.textTheme.titleMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Take a quiz to see your history.',
+                    style: theme.textTheme.bodySmall,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  PrimaryButton(label: 'Refresh', onPressed: _loadAttempts),
+                ],
               ),
             ),
           ],
@@ -200,59 +209,59 @@ class _MyAttemptsScreenState extends State<MyAttemptsScreen> {
 
     return RefreshIndicator(
       onRefresh: _loadAttempts,
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: _attempts.length,
-        itemBuilder: (context, index) {
-          final attempt = _attempts[index];
-          return _AttemptCard(
-            attempt: attempt,
-            onTap: () => _viewResult(attempt),
-          );
-        },
+      child: FixedWidthContainer(
+        child: ListView.builder(
+          padding: const EdgeInsets.fromLTRB(0, 12, 0, 24),
+          itemCount: _attempts.length,
+          itemBuilder: (context, index) {
+            final attempt = _attempts[index];
+            return _AttemptRow(
+              attempt: attempt,
+              onTap: () => _viewResult(attempt),
+            );
+          },
+        ),
       ),
     );
   }
 }
 
-class _AttemptCard extends StatelessWidget {
+class _AttemptRow extends StatelessWidget {
   final QuizAttempt attempt;
   final VoidCallback onTap;
 
-  const _AttemptCard({required this.attempt, required this.onTap});
+  const _AttemptRow({required this.attempt, required this.onTap});
 
   Color _scoreColor(ColorScheme colors, double score) {
-    if (score >= 80) return colors.primary;
-    if (score >= 60) return colors.tertiary;
+    if (score >= 80) return Colors.green.shade700;
+    if (score >= 60) return Colors.amber.shade800;
     return colors.error;
-  }
-
-  BorderRadius _resolveCardRadius(BuildContext context) {
-    final shape = Theme.of(context).cardTheme.shape;
-    if (shape is RoundedRectangleBorder) {
-      return shape.borderRadius.resolve(Directionality.of(context));
-    }
-    return BorderRadius.circular(16);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    final cardRadius = _resolveCardRadius(context);
+    final secondary =
+        theme.textTheme.bodySmall?.color ?? colors.onSurfaceVariant;
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      clipBehavior: Clip.antiAlias,
+    final isTappable = attempt.isCompleted;
+    final scoreColor = _scoreColor(colors, attempt.score);
+
+    return SurfaceCard(
+      bordered: true,
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       child: InkWell(
-        onTap: attempt.isCompleted ? onTap : null,
-        borderRadius: cardRadius,
+        onTap: isTappable ? onTap : null,
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.zero,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     child: Text(
@@ -262,103 +271,57 @@ class _AttemptCard extends StatelessWidget {
                       ),
                     ),
                   ),
+                  const SizedBox(width: 12),
                   if (attempt.isCompleted)
-                    Chip(
-                      label: Text('${attempt.score.toStringAsFixed(1)}%'),
-                      backgroundColor: _scoreColor(
-                        colors,
-                        attempt.score,
-                      ).withOpacity(0.16),
-                      labelStyle: theme.textTheme.labelMedium?.copyWith(
-                        color: _scoreColor(colors, attempt.score),
-                        fontWeight: FontWeight.w800,
-                      ),
-                      side: BorderSide(
-                        color: _scoreColor(colors, attempt.score),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                    ),
-                  if (!attempt.isCompleted)
-                    Chip(
-                      label: const Text('Incomplete'),
-                      backgroundColor: colors.onSurfaceVariant.withOpacity(
-                        0.10,
-                      ),
-                      labelStyle: theme.textTheme.labelMedium?.copyWith(
-                        color: colors.onSurfaceVariant,
-                        fontWeight: FontWeight.w700,
-                      ),
-                      side: BorderSide(color: colors.outlineVariant),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
+                    PillTag(
+                      label: '${attempt.score.toStringAsFixed(1)}%',
+                      color: scoreColor,
+                    )
+                  else
+                    PillTag(
+                      label: 'Incomplete',
+                      color: colors.onSurfaceVariant,
+                      backgroundAlpha: 20,
+                      borderAlpha: 48,
+                      textStyle: TextStyle(color: colors.onSurfaceVariant),
                     ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
               Row(
                 children: [
-                  Icon(
-                    Icons.calendar_today,
-                    size: 16,
-                    color: colors.onSurfaceVariant,
-                  ),
+                  Icon(Icons.calendar_today, size: 16, color: secondary),
                   const SizedBox(width: 6),
                   Text(
                     _formatDate(attempt.startedAt),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colors.onSurfaceVariant,
-                    ),
+                    style: theme.textTheme.bodySmall,
                   ),
                   const SizedBox(width: 16),
-                  Icon(
-                    Icons.access_time,
-                    size: 16,
-                    color: colors.onSurfaceVariant,
-                  ),
+                  Icon(Icons.access_time, size: 16, color: secondary),
                   const SizedBox(width: 6),
                   Text(
                     _formatTime(attempt.startedAt),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colors.onSurfaceVariant,
-                    ),
+                    style: theme.textTheme.bodySmall,
+                  ),
+                  const Spacer(),
+                  Icon(
+                    Icons.chevron_right,
+                    color: isTappable
+                        ? colors.onSurfaceVariant
+                        : colors.onSurfaceVariant.withAlpha(90),
                   ),
                 ],
               ),
               if (attempt.isCompleted) ...[
                 const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.check_circle,
-                      size: 16,
-                      color: colors.onSurfaceVariant,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Completed on ${_formatDate(attempt.completedAt!)}',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: colors.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
+                Text(
+                  'Completed ${_formatDate(attempt.completedAt!)}',
+                  style: theme.textTheme.bodySmall,
                 ),
-              ],
-              if (attempt.isCompleted) ...[
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton.icon(
-                      onPressed: onTap,
-                      icon: const Icon(Icons.visibility, size: 18),
-                      label: const Text('View Results'),
-                    ),
-                  ],
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: LinkButton(label: 'View results', onPressed: onTap),
                 ),
               ],
             ],
@@ -380,5 +343,27 @@ class _AttemptCard extends StatelessWidget {
 
   String _formatTime(DateTime date) {
     return '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  }
+}
+
+class _CenteredPanel extends StatelessWidget {
+  const _CenteredPanel({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return FixedWidthContainer(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520),
+          child: SurfaceCard(
+            bordered: true,
+            margin: EdgeInsets.zero,
+            child: child,
+          ),
+        ),
+      ),
+    );
   }
 }

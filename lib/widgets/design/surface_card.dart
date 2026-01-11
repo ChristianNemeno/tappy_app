@@ -9,6 +9,7 @@ class SurfaceCard extends StatelessWidget {
     this.bordered = false,
     this.borderColor,
     this.borderWidth = 1,
+    this.clipBehavior = Clip.antiAlias,
   });
 
   final Widget child;
@@ -17,6 +18,7 @@ class SurfaceCard extends StatelessWidget {
   final bool bordered;
   final Color? borderColor;
   final double borderWidth;
+  final Clip clipBehavior;
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +41,7 @@ class SurfaceCard extends StatelessWidget {
       color: cardTheme.color,
       surfaceTintColor: cardTheme.surfaceTintColor,
       shape: bordered ? borderedShape : shape,
+      clipBehavior: clipBehavior,
       child: Padding(padding: padding, child: child),
     );
   }
