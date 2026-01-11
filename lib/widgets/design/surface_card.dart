@@ -21,7 +21,8 @@ class SurfaceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cardTheme = Theme.of(context).cardTheme;
-    final shape = (cardTheme.shape as RoundedRectangleBorder?) ??
+    final shape =
+        (cardTheme.shape as RoundedRectangleBorder?) ??
         RoundedRectangleBorder(borderRadius: BorderRadius.circular(16));
 
     final borderedShape = RoundedRectangleBorder(
@@ -38,10 +39,7 @@ class SurfaceCard extends StatelessWidget {
       color: cardTheme.color,
       surfaceTintColor: cardTheme.surfaceTintColor,
       shape: bordered ? borderedShape : shape,
-      child: Padding(
-        padding: padding,
-        child: child,
-      ),
+      child: Padding(padding: padding, child: child),
     );
   }
 }

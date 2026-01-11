@@ -20,9 +20,15 @@ class InlineMessageBanner extends StatelessWidget {
 
     final (Color accent, IconData icon) = switch (variant) {
       InlineMessageVariant.info => (scheme.primary, Icons.info_outline),
-      InlineMessageVariant.warning => (Colors.amber.shade800, Icons.warning_amber_rounded),
+      InlineMessageVariant.warning => (
+        Colors.amber.shade800,
+        Icons.warning_amber_rounded,
+      ),
       InlineMessageVariant.error => (scheme.error, Icons.error_outline),
-      InlineMessageVariant.success => (Colors.green.shade700, Icons.check_circle_outline),
+      InlineMessageVariant.success => (
+        Colors.green.shade700,
+        Icons.check_circle_outline,
+      ),
     };
 
     final bg = accent.withOpacity(0.08);
@@ -50,10 +56,9 @@ class InlineMessageBanner extends StatelessWidget {
                 if (title != null) ...[
                   Text(
                     title!,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(fontWeight: FontWeight.w700),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 2),
                 ],

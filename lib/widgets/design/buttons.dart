@@ -45,20 +45,13 @@ class PrimaryButton extends StatelessWidget {
 }
 
 class LinkButton extends StatelessWidget {
-  const LinkButton({
-    super.key,
-    required this.label,
-    required this.onPressed,
-  });
+  const LinkButton({super.key, required this.label, required this.onPressed});
 
   final String label;
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: onPressed,
-      child: Text(label),
-    );
+    return TextButton(onPressed: onPressed, child: Text(label));
   }
 }
