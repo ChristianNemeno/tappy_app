@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tappy_app/providers/auth_provider.dart';
-
-
-
-
+import 'package:tappy_app/widgets/design/buttons.dart';
+import 'package:tappy_app/widgets/design/fixed_width_container.dart';
+import 'package:tappy_app/widgets/design/inline_message_banner.dart';
+import 'package:tappy_app/widgets/design/surface_card.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -59,15 +59,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       print(
         '[ERROR] RegisterScreen: Registration failed - ${authProvider.error}',
       );
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            SnackBar(
-              content: Text(authProvider.error ?? 'An unknown error occurred'),
-            ),
-          );
-      }
     }
   }
 
@@ -76,94 +67,118 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Register')),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 420),
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        'Create your account',
-                        style: theme.textTheme.titleLarge,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Start taking quizzes in seconds',
-                        style: theme.textTheme.bodySmall,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _usernameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Username',
-                        ),
-                        validator: (value) => (value == null || value.isEmpty)
-                            ? 'Please enter a username'
-                            : null,
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: _emailController,
-                        decoration: const InputDecoration(labelText: 'Email'),
-                        keyboardType: TextInputType.emailAddress,
-                        validator: (value) => (value == null || value.isEmpty)
-                            ? 'Please enter an email'
-                            : null,
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: _passwordController,
-                        decoration: const InputDecoration(
-                          labelText: 'Password',
-                        ),
-                        obscureText: true,
-                        validator: (value) =>
-                            (value == null || value.length < 6)
-                            ? 'Password must be at least 6 characters'
-                            : null,
-                      ),
-                      const SizedBox(height: 16),
-                      Consumer<AuthProvider>(
-                        builder: (context, auth, child) {
-                          if (auth.isLoading) {
-                            return const Center(
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(vertical: 12),
-                                child: CircularProgressIndicator(),
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: FixedWidthContainer(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 420),
+                      child: SurfaceCard(
+                        margin: EdgeInsets.zero,
+                        padding: const EdgeInsets.all(16),
+                        child: Consumer<AuthProvider>(
+                          builder: (context, auth, _) {
+                            final isLoading = auth.isLoading;
+                            final errorMessage = auth.error;
+
+                            return AbsorbPointer(
+                              absorbing: isLoading,
+                              child: Form(
+                                key: _formKey,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Text(
+                                      'Create your account',
+                                      style: theme.textTheme.titleLarge,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Start taking quizzes in seconds',
+                                      style: theme.textTheme.bodySmall,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    if (errorMessage != null &&
+                                        errorMessage.trim().isNotEmpty) ...[
+                                      const SizedBox(height: 16),
+                                      InlineMessageBanner(
+                                        title: 'Registration failed',
+                                        message: errorMessage,
+                                        variant: InlineMessageVariant.error,
+                                      ),
+                                    ],
+                                    const SizedBox(height: 16),
+                                    TextFormField(
+                                      controller: _usernameController,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Username',
+                                      ),
+                                      textInputAction: TextInputAction.next,
+                                      validator: (value) =>
+                                          (value == null || value.isEmpty)
+                                          ? 'Please enter a username'
+                                          : null,
+                                    ),
+                                    const SizedBox(height: 12),
+                                    TextFormField(
+                                      controller: _emailController,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Email',
+                                      ),
+                                      keyboardType: TextInputType.emailAddress,
+                                      textInputAction: TextInputAction.next,
+                                      validator: (value) =>
+                                          (value == null || value.isEmpty)
+                                          ? 'Please enter an email'
+                                          : null,
+                                    ),
+                                    const SizedBox(height: 12),
+                                    TextFormField(
+                                      controller: _passwordController,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Password',
+                                      ),
+                                      obscureText: true,
+                                      textInputAction: TextInputAction.done,
+                                      onFieldSubmitted: (_) => _register(),
+                                      validator: (value) =>
+                                          (value == null || value.length < 6)
+                                          ? 'Password must be at least 6 characters'
+                                          : null,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    PrimaryButton(
+                                      label: 'Register',
+                                      isLoading: isLoading,
+                                      onPressed: _register,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    LinkButton(
+                                      label: 'Already have an account? Login',
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(),
+                                    ),
+                                  ],
+                                ),
                               ),
                             );
-                          }
-                          return SizedBox(
-                            height: 48,
-                            child: ElevatedButton(
-                              onPressed: _register,
-                              child: const Text('Register'),
-                            ),
-                          );
-                        },
+                          },
+                        ),
                       ),
-                      const SizedBox(height: 8),
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Already have an account? Login'),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );

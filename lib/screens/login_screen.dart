@@ -63,101 +63,109 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(vertical: 24),
-          child: FixedWidthContainer(
-            child: Center(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(vertical: 24),
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: SurfaceCard(
-                  margin: EdgeInsets.zero,
-                  padding: const EdgeInsets.all(16),
-                  child: Consumer<AuthProvider>(
-                    builder: (context, auth, _) {
-                      final isLoading = auth.isLoading;
-                      final errorMessage = auth.error;
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: FixedWidthContainer(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 420),
+                      child: SurfaceCard(
+                        margin: EdgeInsets.zero,
+                        padding: const EdgeInsets.all(16),
+                        child: Consumer<AuthProvider>(
+                          builder: (context, auth, _) {
+                            final isLoading = auth.isLoading;
+                            final errorMessage = auth.error;
 
-                      return AbsorbPointer(
-                        absorbing: isLoading,
-                        child: Form(
-                          key: _formKey,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Text(
-                                'Welcome back',
-                                style: theme.textTheme.titleLarge,
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Sign in to continue',
-                                style: theme.textTheme.bodySmall,
-                                textAlign: TextAlign.center,
-                              ),
-                              if (errorMessage != null &&
-                                  errorMessage.trim().isNotEmpty) ...[
-                                const SizedBox(height: 16),
-                                InlineMessageBanner(
-                                  title: 'Login failed',
-                                  message: errorMessage,
-                                  variant: InlineMessageVariant.error,
-                                ),
-                              ],
-                              const SizedBox(height: 16),
-                              TextFormField(
-                                controller: _emailController,
-                                decoration: const InputDecoration(
-                                  labelText: 'Email',
-                                ),
-                                keyboardType: TextInputType.emailAddress,
-                                validator: (value) =>
-                                    (value == null || value.isEmpty)
-                                    ? 'Please enter an email'
-                                    : null,
-                              ),
-                              const SizedBox(height: 12),
-                              TextFormField(
-                                controller: _passwordController,
-                                decoration: const InputDecoration(
-                                  labelText: 'Password',
-                                ),
-                                obscureText: true,
-                                validator: (value) =>
-                                    (value == null || value.isEmpty)
-                                    ? 'Please enter a password'
-                                    : null,
-                              ),
-                              const SizedBox(height: 16),
-                              PrimaryButton(
-                                label: 'Login',
-                                isLoading: isLoading,
-                                onPressed: _login,
-                              ),
-                              const SizedBox(height: 8),
-                              LinkButton(
-                                label: "Don't have an account? Register",
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          const RegisterScreen(),
+                            return AbsorbPointer(
+                              absorbing: isLoading,
+                              child: Form(
+                                key: _formKey,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Text(
+                                      'Welcome back',
+                                      style: theme.textTheme.titleLarge,
+                                      textAlign: TextAlign.center,
                                     ),
-                                  );
-                                },
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Sign in to continue',
+                                      style: theme.textTheme.bodySmall,
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    if (errorMessage != null &&
+                                        errorMessage.trim().isNotEmpty) ...[
+                                      const SizedBox(height: 16),
+                                      InlineMessageBanner(
+                                        title: 'Login failed',
+                                        message: errorMessage,
+                                        variant: InlineMessageVariant.error,
+                                      ),
+                                    ],
+                                    const SizedBox(height: 16),
+                                    TextFormField(
+                                      controller: _emailController,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Email',
+                                      ),
+                                      keyboardType: TextInputType.emailAddress,
+                                      validator: (value) =>
+                                          (value == null || value.isEmpty)
+                                          ? 'Please enter an email'
+                                          : null,
+                                    ),
+                                    const SizedBox(height: 12),
+                                    TextFormField(
+                                      controller: _passwordController,
+                                      decoration: const InputDecoration(
+                                        labelText: 'Password',
+                                      ),
+                                      obscureText: true,
+                                      validator: (value) =>
+                                          (value == null || value.isEmpty)
+                                          ? 'Please enter a password'
+                                          : null,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    PrimaryButton(
+                                      label: 'Login',
+                                      isLoading: isLoading,
+                                      onPressed: _login,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    LinkButton(
+                                      label: "Don't have an account? Register",
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const RegisterScreen(),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ],
-                          ),
+                            );
+                          },
                         ),
-                      );
-                    },
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );

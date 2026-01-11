@@ -31,8 +31,9 @@ class InlineMessageBanner extends StatelessWidget {
       ),
     };
 
-    final bg = accent.withOpacity(0.08);
-    final border = accent.withOpacity(0.25);
+    // Avoid deprecated Color.withOpacity (precision loss warning).
+    final bg = accent.withAlpha(20); // ~8%
+    final border = accent.withAlpha(64); // ~25%
 
     return Container(
       decoration: BoxDecoration(

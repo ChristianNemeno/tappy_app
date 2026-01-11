@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../providers/quiz_provider.dart';
-import '../../widgets/quiz_card.dart';
+import 'package:tappy_app/providers/quiz_provider.dart';
+import 'package:tappy_app/widgets/design/buttons.dart';
+import 'package:tappy_app/widgets/design/fixed_width_container.dart';
+import 'package:tappy_app/widgets/design/inline_message_banner.dart';
+import 'package:tappy_app/widgets/design/surface_card.dart';
+import 'package:tappy_app/widgets/quiz_card.dart';
 
 class DiscoverScreen extends StatefulWidget {
   const DiscoverScreen({super.key});
@@ -49,24 +53,23 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             print(
               '[ERROR] DiscoverScreen: Displaying error state - ${provider.error}',
             );
-            return Center(
+            return _CenteredPanel(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Icon(Icons.error_outline, size: 60, color: colors.error),
-                  const SizedBox(height: 16),
-                  Text(
-                    provider.error ?? 'An error occurred',
-                    style: theme.textTheme.bodyMedium,
-                    textAlign: TextAlign.center,
+                  InlineMessageBanner(
+                    title: 'Could not load quizzes',
+                    message: provider.error ?? 'An error occurred',
+                    variant: InlineMessageVariant.error,
                   ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
+                  const SizedBox(height: 12),
+                  PrimaryButton(
+                    label: 'Retry',
                     onPressed: () {
                       print('[INFO] DiscoverScreen: User pressed retry button');
                       provider.refreshQuizzes();
                     },
-                    child: const Text('Retry'),
                   ),
                 ],
               ),
@@ -75,19 +78,49 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
 
           if (provider.quizzes.isEmpty) {
             print('[INFO] DiscoverScreen: No quizzes available to display');
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+            return RefreshIndicator(
+              onRefresh: () {
+                print('[DEBUG] DiscoverScreen: Pull-to-refresh triggered');
+                return provider.refreshQuizzes();
+              },
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.zero,
                 children: [
-                  Icon(
-                    Icons.quiz,
-                    size: 80,
-                    color: colors.onSurfaceVariant.withOpacity(0.45),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No quizzes available',
-                    style: theme.textTheme.titleMedium,
+                  SizedBox(height: MediaQuery.sizeOf(context).height * 0.15),
+                  _CenteredPanel(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.quiz,
+                          size: 72,
+                          color: colors.onSurfaceVariant.withAlpha(115),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'No quizzes available',
+                          style: theme.textTheme.titleMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Pull to refresh, or try again in a moment.',
+                          style: theme.textTheme.bodySmall,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 12),
+                        PrimaryButton(
+                          label: 'Refresh',
+                          onPressed: () {
+                            print(
+                              '[INFO] DiscoverScreen: User pressed refresh button',
+                            );
+                            provider.refreshQuizzes();
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -102,16 +135,40 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
               print('[DEBUG] DiscoverScreen: Pull-to-refresh triggered');
               return provider.refreshQuizzes();
             },
-            child: ListView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-              physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: provider.quizzes.length,
-              itemBuilder: (context, index) {
-                return QuizCard(quiz: provider.quizzes[index]);
-              },
+            child: FixedWidthContainer(
+              child: ListView.builder(
+                padding: const EdgeInsets.fromLTRB(0, 12, 0, 24),
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: provider.quizzes.length,
+                itemBuilder: (context, index) {
+                  return QuizCard(quiz: provider.quizzes[index]);
+                },
+              ),
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _CenteredPanel extends StatelessWidget {
+  const _CenteredPanel({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return FixedWidthContainer(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520),
+          child: SurfaceCard(
+            bordered: true,
+            margin: EdgeInsets.zero,
+            child: child,
+          ),
+        ),
       ),
     );
   }
