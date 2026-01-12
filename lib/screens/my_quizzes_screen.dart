@@ -5,6 +5,11 @@ import '../services/quiz_service.dart';
 import 'quiz/create_quiz_screen.dart';
 import 'quiz/edit_quiz_screen.dart';
 import 'quiz/quiz_detail_screen.dart';
+import 'package:tappy_app/widgets/design/buttons.dart';
+import 'package:tappy_app/widgets/design/fixed_width_container.dart';
+import 'package:tappy_app/widgets/design/inline_message_banner.dart';
+import 'package:tappy_app/widgets/design/pill_tag.dart';
+import 'package:tappy_app/widgets/design/surface_card.dart';
 
 class MyQuizzesScreen extends StatefulWidget {
   const MyQuizzesScreen({super.key});
@@ -21,12 +26,10 @@ class _MyQuizzesScreenState extends State<MyQuizzesScreen> {
   @override
   void initState() {
     super.initState();
-    print('[INFO] MyQuizzesScreen: Screen initialized');
     _loadQuizzes();
   } // no error here
 
   Future<void> _loadQuizzes() async {
-    print('[DEBUG] MyQuizzesScreen: Loading user quizzes');
     setState(() {
       _isLoading = true;
       _error = null;
@@ -35,8 +38,6 @@ class _MyQuizzesScreenState extends State<MyQuizzesScreen> {
     try {
       final quizService = context.read<QuizService>();
       final quizzes = await quizService.getMyQuizzes();
-
-      print('[SUCCESS] MyQuizzesScreen: Loaded ${quizzes.length} quizzes');
       if (mounted) {
         setState(() {
           _quizzes = quizzes;
@@ -44,7 +45,6 @@ class _MyQuizzesScreenState extends State<MyQuizzesScreen> {
         });
       }
     } catch (e) {
-      print('[ERROR] MyQuizzesScreen: Failed to load quizzes - $e');
       if (mounted) {
         setState(() {
           _error = e.toString().replaceAll('Exception: ', '');
@@ -54,27 +54,84 @@ class _MyQuizzesScreenState extends State<MyQuizzesScreen> {
     }
   }
 
+  Future<void> _createQuiz() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const CreateQuizScreen()),
+    );
+    if (!mounted) return;
+    if (result == true) {
+      _loadQuizzes();
+    }
+  }
+
+  Future<void> _editQuiz(Quiz quiz) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => EditQuizScreen(quiz: quiz)),
+    );
+    if (!mounted) return;
+    if (result == true) {
+      _loadQuizzes();
+    }
+  }
+
+  void _openQuiz(Quiz quiz) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => QuizDetailScreen(quizId: quiz.id)),
+    );
+  }
+
+  Future<bool> _confirmToggleQuizStatus(Quiz quiz) async {
+    final nextActive = !quiz.isActive;
+    final verb = nextActive ? 'Activate' : 'Deactivate';
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('$verb Quiz'),
+        content: Text(
+          'Are you sure you want to $verb "${quiz.title}"?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(verb),
+          ),
+        ],
+      ),
+    );
+
+    return result == true;
+  }
+
   Future<void> _toggleQuizStatus(Quiz quiz) async {
-    print('[DEBUG] MyQuizzesScreen: Toggling status for quiz ${quiz.id}');
+    final confirmed = await _confirmToggleQuizStatus(quiz);
+    if (!confirmed) return;
+    if (!mounted) return;
+
     try {
       final quizService = context.read<QuizService>();
       await quizService.toggleQuizStatus(quiz.id);
-      print('[SUCCESS] MyQuizzesScreen: Quiz status toggled');
+      if (!mounted) return;
 
-      if (mounted) {
-        final colors = Theme.of(context).colorScheme;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              quiz.isActive
-                  ? 'Quiz deactivated successfully'
-                  : 'Quiz activated successfully',
-            ),
-            backgroundColor: colors.primaryContainer,
+      final colors = Theme.of(context).colorScheme;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            quiz.isActive
+                ? 'Quiz deactivated successfully'
+                : 'Quiz activated successfully',
           ),
-        );
-        _loadQuizzes();
-      }
+          backgroundColor: colors.primaryContainer,
+        ),
+      );
+      _loadQuizzes();
     } catch (e) {
       if (mounted) {
         final colors = Theme.of(context).colorScheme;
@@ -113,21 +170,21 @@ class _MyQuizzesScreenState extends State<MyQuizzesScreen> {
     );
 
     if (confirm != true) return;
+    if (!mounted) return;
 
     try {
       final quizService = context.read<QuizService>();
       await quizService.deleteQuiz(quiz.id);
+      if (!mounted) return;
 
-      if (mounted) {
-        final colors = Theme.of(context).colorScheme;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Quiz deleted successfully'),
-            backgroundColor: colors.primaryContainer,
-          ),
-        );
-        _loadQuizzes();
-      }
+      final colors = Theme.of(context).colorScheme;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Quiz deleted successfully'),
+          backgroundColor: colors.primaryContainer,
+        ),
+      );
+      _loadQuizzes();
     } catch (e) {
       if (mounted) {
         final colors = Theme.of(context).colorScheme;
@@ -147,76 +204,83 @@ class _MyQuizzesScreenState extends State<MyQuizzesScreen> {
       appBar: AppBar(
         title: const Text('My Quizzes'),
         actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadQuizzes),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Refresh',
+            onPressed: _loadQuizzes,
+          ),
+          TextButton.icon(
+            onPressed: _createQuiz,
+            icon: const Icon(Icons.add),
+            label: const Text('Create Quiz'),
+          ),
         ],
       ),
       body: _buildBody(),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const CreateQuizScreen()),
-          );
-          if (result == true) {
-            _loadQuizzes();
-          }
-        },
-        icon: const Icon(Icons.add),
-        label: const Text('Create Quiz'),
-      ),
     );
   }
 
   Widget _buildBody() {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
     if (_error != null) {
-      return Center(
+      return _CenteredPanel(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Icon(Icons.error_outline, size: 60, color: colors.error),
-            const SizedBox(height: 16),
-            Text('Failed to load quizzes', style: theme.textTheme.titleLarge),
-            const SizedBox(height: 8),
-            Text(
-              _error!,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium,
+            InlineMessageBanner(
+              title: 'Failed to load quizzes',
+              message: _error!,
+              variant: InlineMessageVariant.error,
             ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: _loadQuizzes,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
-            ),
+            const SizedBox(height: 12),
+            PrimaryButton(label: 'Retry', onPressed: _loadQuizzes),
           ],
         ),
       );
     }
 
     if (_quizzes.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+      final theme = Theme.of(context);
+      final colors = theme.colorScheme;
+      return RefreshIndicator(
+        onRefresh: _loadQuizzes,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.zero,
           children: [
-            Icon(
-              Icons.quiz,
-              size: 80,
-              color: colors.onSurfaceVariant.withOpacity(0.45),
-            ),
-            const SizedBox(height: 16),
-            Text('No quizzes yet', style: theme.textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Text(
-              'Create your first quiz!',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: colors.onSurfaceVariant,
+            SizedBox(height: MediaQuery.sizeOf(context).height * 0.15),
+            _CenteredPanel(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.quiz_outlined,
+                    size: 72,
+                    color: colors.onSurfaceVariant.withAlpha(115),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'No quizzes yet',
+                    style: theme.textTheme.titleMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Create your first quiz to share or practice.',
+                    style: theme.textTheme.bodySmall,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  PrimaryButton(
+                    label: 'Create quiz',
+                    icon: Icons.add,
+                    onPressed: _createQuiz,
+                  ),
+                ],
               ),
             ),
           ],
@@ -226,82 +290,67 @@ class _MyQuizzesScreenState extends State<MyQuizzesScreen> {
 
     return RefreshIndicator(
       onRefresh: _loadQuizzes,
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: _quizzes.length,
-        itemBuilder: (context, index) {
-          final quiz = _quizzes[index];
-          return _QuizManagementCard(
-            quiz: quiz,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => QuizDetailScreen(quizId: quiz.id),
-                ),
-              );
-            },
-            onEdit: () async {
-              final result = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => EditQuizScreen(quiz: quiz),
-                ),
-              );
-              if (result == true) {
-                _loadQuizzes();
-              }
-            },
-            onToggle: () => _toggleQuizStatus(quiz),
-            onDelete: () => _deleteQuiz(quiz),
-          );
-        },
+      child: FixedWidthContainer(
+        child: ListView.builder(
+          padding: const EdgeInsets.fromLTRB(0, 12, 0, 24),
+          itemCount: _quizzes.length,
+          itemBuilder: (context, index) {
+            final quiz = _quizzes[index];
+            return _QuizRow(
+              quiz: quiz,
+              onOpen: () => _openQuiz(quiz),
+              onEdit: () => _editQuiz(quiz),
+              onToggle: () => _toggleQuizStatus(quiz),
+              onDelete: () => _deleteQuiz(quiz),
+            );
+          },
+        ),
       ),
     );
   }
 }
 
-class _QuizManagementCard extends StatelessWidget {
-  final Quiz quiz;
-  final VoidCallback onTap;
-  final VoidCallback onEdit;
-  final VoidCallback onToggle;
-  final VoidCallback onDelete;
+enum _QuizMenuAction { edit, toggle, delete }
 
-  const _QuizManagementCard({
+class _QuizRow extends StatelessWidget {
+  const _QuizRow({
     required this.quiz,
-    required this.onTap,
+    required this.onOpen,
     required this.onEdit,
     required this.onToggle,
     required this.onDelete,
   });
 
-  BorderRadius _resolveCardRadius(BuildContext context) {
-    final shape = Theme.of(context).cardTheme.shape;
-    if (shape is RoundedRectangleBorder) {
-      return shape.borderRadius.resolve(Directionality.of(context));
-    }
-    return BorderRadius.circular(16);
-  }
+  final Quiz quiz;
+  final VoidCallback onOpen;
+  final VoidCallback onEdit;
+  final VoidCallback onToggle;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    final cardRadius = _resolveCardRadius(context);
+    final secondary =
+        theme.textTheme.bodySmall?.color ?? colors.onSurfaceVariant;
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      clipBehavior: Clip.antiAlias,
+    final isActive = quiz.isActive;
+    final statusColor = isActive ? colors.primary : colors.onSurfaceVariant;
+
+    return SurfaceCard(
+      bordered: true,
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       child: InkWell(
-        onTap: onTap,
-        borderRadius: cardRadius,
+        onTap: onOpen,
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.zero,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     child: Column(
@@ -314,7 +363,7 @@ class _QuizManagementCard extends StatelessWidget {
                           ),
                         ),
                         if (quiz.description.isNotEmpty) ...[
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 6),
                           Text(
                             quiz.description,
                             style: theme.textTheme.bodySmall?.copyWith(
@@ -327,81 +376,84 @@ class _QuizManagementCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Chip(
-                    label: Text(quiz.isActive ? 'Active' : 'Inactive'),
-                    backgroundColor: quiz.isActive
-                        ? colors.primaryContainer
-                        : colors.onSurfaceVariant.withOpacity(0.10),
-                    labelStyle: theme.textTheme.labelMedium?.copyWith(
-                      color: quiz.isActive
-                          ? colors.onPrimaryContainer
-                          : colors.onSurfaceVariant,
-                      fontWeight: FontWeight.w800,
-                    ),
-                    side: BorderSide(
-                      color: quiz.isActive
-                          ? colors.primary
-                          : colors.outlineVariant,
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
+                  const SizedBox(width: 12),
+                  PillTag(
+                    label: isActive ? 'Active' : 'Inactive',
+                    color: statusColor,
+                    backgroundAlpha: isActive ? 24 : 18,
+                    borderAlpha: isActive ? 64 : 48,
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
               Row(
                 children: [
-                  Icon(Icons.quiz, size: 16, color: colors.onSurfaceVariant),
-                  const SizedBox(width: 4),
+                  Icon(Icons.quiz, size: 16, color: secondary),
+                  const SizedBox(width: 6),
                   Text(
                     '${quiz.questionCount} questions',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colors.onSurfaceVariant,
-                    ),
+                    style: theme.textTheme.bodySmall,
                   ),
                   const SizedBox(width: 16),
-                  Icon(
-                    Icons.calendar_today,
-                    size: 16,
-                    color: colors.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 4),
+                  Icon(Icons.calendar_today, size: 16, color: secondary),
+                  const SizedBox(width: 6),
                   Text(
                     _formatDate(quiz.createdAt),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colors.onSurfaceVariant,
-                    ),
+                    style: theme.textTheme.bodySmall,
                   ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton.icon(
-                    onPressed: onEdit,
-                    icon: const Icon(Icons.edit, size: 18),
-                    label: const Text('Edit'),
+                  const Spacer(),
+                  PopupMenuButton<_QuizMenuAction>(
+                    tooltip: 'Quiz actions',
+                    onSelected: (action) {
+                      switch (action) {
+                        case _QuizMenuAction.edit:
+                          onEdit();
+                          break;
+                        case _QuizMenuAction.toggle:
+                          onToggle();
+                          break;
+                        case _QuizMenuAction.delete:
+                          onDelete();
+                          break;
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: _QuizMenuAction.edit,
+                        child: ListTile(
+                          leading: Icon(Icons.edit_outlined),
+                          title: Text('Edit'),
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: _QuizMenuAction.toggle,
+                        child: ListTile(
+                          leading: Icon(
+                            isActive
+                                ? Icons.visibility_off_outlined
+                                : Icons.visibility_outlined,
+                          ),
+                          title: Text(isActive ? 'Deactivate' : 'Activate'),
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: _QuizMenuAction.delete,
+                        child: ListTile(
+                          leading: Icon(Icons.delete_outline, color: colors.error),
+                          title: Text('Delete', style: TextStyle(color: colors.error)),
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                    ],
+                    child: const Icon(Icons.more_vert),
                   ),
-                  TextButton.icon(
-                    onPressed: onToggle,
-                    icon: Icon(
-                      quiz.isActive ? Icons.visibility_off : Icons.visibility,
-                      size: 18,
-                    ),
-                    label: Text(quiz.isActive ? 'Deactivate' : 'Activate'),
-                  ),
-                  TextButton.icon(
-                    onPressed: onDelete,
-                    icon: Icon(Icons.delete, size: 18, color: colors.error),
-                    label: Text(
-                      'Delete',
-                      style: TextStyle(color: colors.error),
-                    ),
-                  ),
+                  const SizedBox(width: 4),
+                  Icon(Icons.chevron_right, color: colors.onSurfaceVariant),
                 ],
               ),
             ],
@@ -419,5 +471,27 @@ class _QuizManagementCard extends StatelessWidget {
     if (diff.inDays == 1) return 'Yesterday';
     if (diff.inDays < 7) return '${diff.inDays} days ago';
     return '${date.day}/${date.month}/${date.year}';
+  }
+}
+
+class _CenteredPanel extends StatelessWidget {
+  const _CenteredPanel({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return FixedWidthContainer(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520),
+          child: SurfaceCard(
+            bordered: true,
+            margin: EdgeInsets.zero,
+            child: child,
+          ),
+        ),
+      ),
+    );
   }
 }
