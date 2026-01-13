@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import '../../models/attempt_result.dart';
 import '../../models/question_result.dart';
+import '../../theme/tokens.dart';
+import '../../widgets/design/fixed_width_container.dart';
+import '../../widgets/design/quiz_tiles.dart';
+import '../../widgets/design/surface_card.dart';
 
 class DetailedReviewScreen extends StatefulWidget {
   final AttemptResult result;
 
-  const DetailedReviewScreen({
-    super.key,
-    required this.result,
-  });
+  const DetailedReviewScreen({super.key, required this.result});
 
   @override
   State<DetailedReviewScreen> createState() => _DetailedReviewScreenState();
@@ -22,7 +23,9 @@ class _DetailedReviewScreenState extends State<DetailedReviewScreen> {
       case 'correct':
         return widget.result.questionResults.where((q) => q.isCorrect).toList();
       case 'incorrect':
-        return widget.result.questionResults.where((q) => !q.isCorrect).toList();
+        return widget.result.questionResults
+            .where((q) => !q.isCorrect)
+            .toList();
       default:
         return widget.result.questionResults;
     }
@@ -31,7 +34,9 @@ class _DetailedReviewScreenState extends State<DetailedReviewScreen> {
   @override
   Widget build(BuildContext context) {
     print('[INFO] DetailedReviewScreen: Displaying detailed review');
-    print('[DEBUG] DetailedReviewScreen: Filter mode: $_filterMode, Questions shown: ${_filteredQuestions.length}');
+    print(
+      '[DEBUG] DetailedReviewScreen: Filter mode: $_filterMode, Questions shown: ${_filteredQuestions.length}',
+    );
     return Scaffold(
       appBar: AppBar(
         title: const Text('Detailed Review'),
@@ -87,12 +92,12 @@ class _DetailedReviewScreenState extends State<DetailedReviewScreen> {
             child: _filteredQuestions.isEmpty
                 ? _buildEmptyState()
                 : ListView.builder(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(AppSpacing.md),
                     itemCount: _filteredQuestions.length,
                     itemBuilder: (context, index) {
                       final question = _filteredQuestions[index];
-                      final originalIndex = widget.result.questionResults
-                          .indexOf(question) + 1;
+                      final originalIndex =
+                          widget.result.questionResults.indexOf(question) + 1;
                       return _QuestionReviewCard(
                         question: question,
                         questionNumber: originalIndex,
@@ -107,56 +112,68 @@ class _DetailedReviewScreenState extends State<DetailedReviewScreen> {
 
   Widget _buildSummaryBar() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor.withOpacity(0.1),
+        color: Theme.of(context).colorScheme.primary.withAlpha(14),
         border: Border(
-          bottom: BorderSide(
-            color: Colors.grey[300]!,
-            width: 1,
-          ),
+          bottom: BorderSide(color: Theme.of(context).dividerColor, width: 1),
         ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _SummaryChip(
-            icon: Icons.check_circle,
-            color: Colors.green,
-            label: 'Correct',
-            count: widget.result.correctAnswers,
-            isActive: _filterMode == 'correct',
-            onTap: () {
-              setState(() {
-                _filterMode = _filterMode == 'correct' ? 'all' : 'correct';
-              });
-            },
+      child: FixedWidthContainer(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Row(
+            children: [
+              Expanded(
+                child: QuizMetricTile(
+                  icon: Icons.check_circle,
+                  accentColor: AppColors.success,
+                  label: 'Correct',
+                  value: '${widget.result.correctAnswers}',
+                  isActive: _filterMode == 'correct',
+                  onTap: () {
+                    setState(() {
+                      _filterMode = _filterMode == 'correct'
+                          ? 'all'
+                          : 'correct';
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm + 4),
+              Expanded(
+                child: QuizMetricTile(
+                  icon: Icons.cancel,
+                  accentColor: AppColors.danger,
+                  label: 'Incorrect',
+                  value: '${widget.result.incorrectAnswers}',
+                  isActive: _filterMode == 'incorrect',
+                  onTap: () {
+                    setState(() {
+                      _filterMode = _filterMode == 'incorrect'
+                          ? 'all'
+                          : 'incorrect';
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm + 4),
+              Expanded(
+                child: QuizMetricTile(
+                  icon: Icons.quiz,
+                  accentColor: AppColors.info,
+                  label: 'Total',
+                  value: '${widget.result.totalQuestions}',
+                  isActive: _filterMode == 'all',
+                  onTap: () {
+                    setState(() {
+                      _filterMode = 'all';
+                    });
+                  },
+                ),
+              ),
+            ],
           ),
-          _SummaryChip(
-            icon: Icons.cancel,
-            color: Colors.red,
-            label: 'Incorrect',
-            count: widget.result.incorrectAnswers,
-            isActive: _filterMode == 'incorrect',
-            onTap: () {
-              setState(() {
-                _filterMode = _filterMode == 'incorrect' ? 'all' : 'incorrect';
-              });
-            },
-          ),
-          _SummaryChip(
-            icon: Icons.quiz,
-            color: Colors.blue,
-            label: 'Total',
-            count: widget.result.totalQuestions,
-            isActive: _filterMode == 'all',
-            onTap: () {
-              setState(() {
-                _filterMode = 'all';
-              });
-            },
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -187,76 +204,9 @@ class _DetailedReviewScreenState extends State<DetailedReviewScreen> {
           const SizedBox(height: 16),
           Text(
             message,
-            style: TextStyle(
-              fontSize: 18,
-              color: Colors.grey[600],
-            ),
+            style: TextStyle(fontSize: 18, color: AppColors.textGray),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _SummaryChip extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  final String label;
-  final int count;
-  final bool isActive;
-  final VoidCallback onTap;
-
-  const _SummaryChip({
-    required this.icon,
-    required this.color,
-    required this.label,
-    required this.count,
-    required this.isActive,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: isActive ? color.withOpacity(0.2) : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isActive ? color : Colors.transparent,
-            width: 2,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 20, color: color),
-            const SizedBox(width: 6),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '$count',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
-                ),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -273,212 +223,114 @@ class _QuestionReviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Question Header
+    final correctness = question.isCorrect
+        ? QuizCorrectness.correct
+        : QuizCorrectness.incorrect;
+
+    return SurfaceCard(
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
+      padding: const EdgeInsets.all(AppSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withAlpha(14),
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.primary.withAlpha(80),
+                  ),
+                ),
+                child: Text(
+                  'Q$questionNumber',
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      question.questionText,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    QuizCorrectnessPill(correctness: correctness),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          const Divider(),
+          const SizedBox(height: AppSpacing.md),
+
+          ReviewAnswerTile(
+            label: 'Your Answer',
+            answerText: question.selectedChoiceText,
+            correctness: question.isCorrect
+                ? QuizCorrectness.correct
+                : QuizCorrectness.incorrect,
+          ),
+          const SizedBox(height: AppSpacing.sm + 4),
+
+          if (!question.isCorrect) ...[
+            ReviewAnswerTile(
+              label: 'Correct Answer',
+              answerText: question.correctChoiceText,
+              correctness: QuizCorrectness.correct,
+            ),
+            const SizedBox(height: AppSpacing.sm + 4),
+          ],
+
+          if (question.explanation != null &&
+              question.explanation!.isNotEmpty) ...[
+            const Divider(),
+            const SizedBox(height: AppSpacing.sm + 4),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: question.isCorrect
-                        ? Colors.green.withOpacity(0.1)
-                        : Colors.red.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: question.isCorrect ? Colors.green : Colors.red,
-                    ),
-                  ),
-                  child: Text(
-                    'Q$questionNumber',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: question.isCorrect ? Colors.green : Colors.red,
-                    ),
-                  ),
+                Icon(
+                  Icons.lightbulb_outline,
+                  size: 20,
+                  color: Colors.amber.shade800,
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        question.questionText,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                        'Explanation',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          color: Colors.amber.shade800,
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Icon(
-                            question.isCorrect
-                                ? Icons.check_circle
-                                : Icons.cancel,
-                            size: 16,
-                            color: question.isCorrect
-                                ? Colors.green
-                                : Colors.red,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            question.isCorrect ? 'Correct' : 'Incorrect',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: question.isCorrect
-                                  ? Colors.green
-                                  : Colors.red,
-                            ),
-                          ),
-                        ],
+                      Text(
+                        question.explanation!,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.grey[700],
+                          height: 1.5,
+                        ),
                       ),
                     ],
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            const Divider(),
-            const SizedBox(height: 16),
-
-            // Your Answer
-            _AnswerSection(
-              label: 'Your Answer',
-              choiceText: question.selectedChoiceText,
-              isCorrect: question.isCorrect,
-              highlight: true,
-            ),
-            const SizedBox(height: 12),
-
-            // Correct Answer (if wrong)
-            if (!question.isCorrect) ...[
-              _AnswerSection(
-                label: 'Correct Answer',
-                choiceText: question.correctChoiceText,
-                isCorrect: true,
-                highlight: true,
-              ),
-              const SizedBox(height: 12),
-            ],
-
-            // Explanation
-            if (question.explanation != null &&
-                question.explanation!.isNotEmpty) ...[
-              const Divider(),
-              const SizedBox(height: 12),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.lightbulb_outline,
-                    size: 20,
-                    color: Colors.amber[700],
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Explanation',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.amber[700],
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          question.explanation!,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[700],
-                            height: 1.5,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _AnswerSection extends StatelessWidget {
-  final String label;
-  final String choiceText;
-  final bool isCorrect;
-  final bool highlight;
-
-  const _AnswerSection({
-    required this.label,
-    required this.choiceText,
-    required this.isCorrect,
-    this.highlight = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final color = isCorrect ? Colors.green : Colors.red;
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: highlight ? color.withOpacity(0.1) : Colors.grey[100],
-        borderRadius: BorderRadius.circular(8),
-        border: highlight
-            ? Border.all(color: color, width: 2)
-            : Border.all(color: Colors.grey[300]!, width: 1),
-      ),
-      child: Row(
-        children: [
-          if (highlight)
-            Icon(
-              isCorrect ? Icons.check_circle : Icons.cancel,
-              color: color,
-              size: 24,
-            ),
-          if (highlight) const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: highlight ? color : Colors.grey[600],
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  choiceText,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: highlight ? FontWeight.w600 : FontWeight.normal,
-                    color: highlight ? color : Colors.black87,
-                  ),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );
