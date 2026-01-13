@@ -82,7 +82,7 @@ class QuizMetricTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final radius = BorderRadius.circular(AppRadii.card);
-    final bg = isActive ? accentColor.withAlpha(20) : Colors.white;
+    final bg = isActive ? accentColor.withAlpha(20) : Theme.of(context).colorScheme.surface;
     final borderColor = isActive ? accentColor : Theme.of(context).dividerColor;
 
     final tile = Material(
@@ -153,7 +153,7 @@ class AnswerOptionTile extends StatelessWidget {
     final radius = BorderRadius.circular(AppRadii.card);
 
     return Material(
-      color: isSelected ? primary.withAlpha(20) : Colors.white,
+      color: isSelected ? primary.withAlpha(20) : Theme.of(context).colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: radius,
         side: BorderSide(
