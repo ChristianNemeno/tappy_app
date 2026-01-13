@@ -3,6 +3,10 @@ import 'package:provider/provider.dart';
 import '../../models/question.dart';
 import '../../models/quiz.dart';
 import '../../providers/attempt_provider.dart';
+import '../../theme/tokens.dart';
+import '../../widgets/design/fixed_width_container.dart';
+import '../../widgets/design/quiz_tiles.dart';
+import '../../widgets/design/surface_card.dart';
 import 'quiz_result_screen.dart';
 
 class QuizTakingScreen extends StatefulWidget {
@@ -27,8 +31,12 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
   @override
   void initState() {
     super.initState();
-    print('[INFO] QuizTakingScreen: Screen initialized for quiz ${widget.quiz.id}');
-    print('[DEBUG] QuizTakingScreen: Total questions: ${widget.questions.length}');
+    print(
+      '[INFO] QuizTakingScreen: Screen initialized for quiz ${widget.quiz.id}',
+    );
+    print(
+      '[DEBUG] QuizTakingScreen: Total questions: ${widget.questions.length}',
+    );
     Future.microtask(() => _initializeAttempt());
   }
 
@@ -98,11 +106,13 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
   Future<void> _showSubmitDialog() async {
     print('[DEBUG] QuizTakingScreen: Submit button pressed');
     final provider = context.read<AttemptProvider>();
-    
+
     // Check if all questions are answered
     final validationError = provider.validateCompletion();
-    print('[DEBUG] QuizTakingScreen: Answered ${provider.answeredCount}/${provider.totalQuestions} questions');
-    
+    print(
+      '[DEBUG] QuizTakingScreen: Answered ${provider.answeredCount}/${provider.totalQuestions} questions',
+    );
+
     if (validationError != null) {
       // Show warning about unanswered questions
       final proceed = await showDialog<bool>(
@@ -115,10 +125,7 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
               Text('Incomplete Quiz'),
             ],
           ),
-          content: Text(
-            validationError,
-            style: const TextStyle(fontSize: 16),
-          ),
+          content: Text(validationError, style: const TextStyle(fontSize: 16)),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
@@ -126,9 +133,7 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-              ),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
               child: const Text('Submit Anyway'),
             ),
           ],
@@ -155,10 +160,7 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
             const SizedBox(height: 16),
             const Text(
               'Once submitted, you cannot change your answers.',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -186,7 +188,7 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
 
   Future<void> _submitAttempt() async {
     final provider = context.read<AttemptProvider>();
-    
+
     final success = await provider.submitAttempt();
 
     if (!mounted) return;
@@ -232,9 +234,7 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
   Widget build(BuildContext context) {
     if (_isStarting) {
       return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.quiz.title),
-        ),
+        appBar: AppBar(title: Text(widget.quiz.title)),
         body: const Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -264,9 +264,7 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
               ),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context, true),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                ),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                 child: const Text('Exit'),
               ),
             ],
@@ -313,8 +311,11 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
     return Consumer<AttemptProvider>(
       builder: (context, provider, child) {
         return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          color: Theme.of(context).primaryColor.withOpacity(0.1),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm + 4,
+          ),
+          color: Theme.of(context).colorScheme.primary.withAlpha(20),
           child: Row(
             children: [
               Expanded(
@@ -331,10 +332,7 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
                     const SizedBox(height: 4),
                     Text(
                       '${provider.answeredCount} answered',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 14, color: AppColors.textGray),
                     ),
                   ],
                 ),
@@ -343,7 +341,7 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
                 value: provider.progress,
                 backgroundColor: Colors.grey[300],
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  Theme.of(context).primaryColor,
+                  Theme.of(context).colorScheme.primary,
                 ),
               ),
               const SizedBox(width: 8),
@@ -365,7 +363,8 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
     return Consumer<AttemptProvider>(
       builder: (context, provider, child) {
         final isFirstQuestion = _currentQuestionIndex == 0;
-        final isLastQuestion = _currentQuestionIndex == widget.questions.length - 1;
+        final isLastQuestion =
+            _currentQuestionIndex == widget.questions.length - 1;
 
         return Container(
           padding: const EdgeInsets.all(16),
@@ -373,7 +372,7 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withAlpha(13),
                 blurRadius: 10,
                 offset: const Offset(0, -2),
               ),
@@ -416,11 +415,15 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
                               height: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
                               ),
                             )
                           : const Icon(Icons.check),
-                      label: Text(provider.isLoading ? 'Submitting...' : 'Submit'),
+                      label: Text(
+                        provider.isLoading ? 'Submitting...' : 'Submit',
+                      ),
                       style: ElevatedButton.styleFrom(
                         minimumSize: const Size.fromHeight(48),
                         backgroundColor: Colors.green,
@@ -454,144 +457,65 @@ class _QuestionCard extends StatelessWidget {
         final selectedChoiceId = provider.getAnswer(question.id);
 
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Question text
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: FixedWidthContainer(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SurfaceCard(
+                  margin: EdgeInsets.zero,
                   child: Text(
                     question.text,
-                    style: const TextStyle(
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontSize: 18,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.md),
 
-              // Question image (if available)
-              if (question.imageUrl != null && question.imageUrl!.isNotEmpty)
-                Card(
-                  clipBehavior: Clip.antiAlias,
-                  child: Image.network(
-                    question.imageUrl!,
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        padding: const EdgeInsets.all(32),
-                        color: Colors.grey[200],
-                        child: const Center(
-                          child: Icon(Icons.broken_image, size: 48),
-                        ),
-                      );
-                    },
+                if (question.imageUrl != null && question.imageUrl!.isNotEmpty)
+                  SurfaceCard(
+                    margin: EdgeInsets.zero,
+                    padding: EdgeInsets.zero,
+                    child: Image.network(
+                      question.imageUrl!,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          padding: const EdgeInsets.all(AppSpacing.xl),
+                          color: Colors.grey[200],
+                          child: const Center(
+                            child: Icon(Icons.broken_image, size: 48),
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                ),
-              if (question.imageUrl != null && question.imageUrl!.isNotEmpty)
-                const SizedBox(height: 16),
+                if (question.imageUrl != null && question.imageUrl!.isNotEmpty)
+                  const SizedBox(height: AppSpacing.md),
 
-              // Choices
-              const Text(
-                'Select your answer:',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+                Text(
+                  'Select your answer',
+                  style: Theme.of(context).textTheme.titleSmall,
                 ),
-              ),
-              const SizedBox(height: 12),
-              ...question.choices.map((choice) {
-                final isSelected = selectedChoiceId == choice.id;
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _ChoiceCard(
-                    choice: choice,
-                    isSelected: isSelected,
-                    onTap: () {
-                      provider.setAnswer(question.id, choice.id);
-                    },
-                  ),
-                );
-              }).toList(),
-            ],
+                const SizedBox(height: AppSpacing.sm),
+                ...question.choices.map((choice) {
+                  final isSelected = selectedChoiceId == choice.id;
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                    child: AnswerOptionTile(
+                      text: choice.text,
+                      isSelected: isSelected,
+                      onTap: () => provider.setAnswer(question.id, choice.id),
+                    ),
+                  );
+                }),
+              ],
+            ),
           ),
         );
       },
-    );
-  }
-}
-
-class _ChoiceCard extends StatelessWidget {
-  final dynamic choice;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _ChoiceCard({
-    required this.choice,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: isSelected
-                ? Theme.of(context).primaryColor
-                : Colors.grey[300]!,
-            width: isSelected ? 2 : 1,
-          ),
-          borderRadius: BorderRadius.circular(12),
-          color: isSelected
-              ? Theme.of(context).primaryColor.withOpacity(0.1)
-              : Colors.white,
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected
-                      ? Theme.of(context).primaryColor
-                      : Colors.grey[400]!,
-                  width: 2,
-                ),
-                color: isSelected
-                    ? Theme.of(context).primaryColor
-                    : Colors.transparent,
-              ),
-              child: isSelected
-                  ? const Icon(
-                      Icons.check,
-                      size: 16,
-                      color: Colors.white,
-                    )
-                  : null,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                choice.text,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
@@ -650,7 +574,7 @@ class _QuestionOverviewSheet extends StatelessWidget {
                           '${provider.answeredCount}/${questions.length}',
                           style: TextStyle(
                             fontSize: 16,
-                            color: Colors.grey[600],
+                            color: AppColors.textGray,
                           ),
                         ),
                       ],
@@ -662,31 +586,36 @@ class _QuestionOverviewSheet extends StatelessWidget {
                     child: GridView.builder(
                       controller: scrollController,
                       padding: const EdgeInsets.all(16),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 5,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                      ),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 5,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                          ),
                       itemCount: questions.length,
                       itemBuilder: (context, index) {
                         final question = questions[index];
-                        final isAnswered = provider.isQuestionAnswered(question.id);
+                        final isAnswered = provider.isQuestionAnswered(
+                          question.id,
+                        );
                         final isCurrent = index == currentIndex;
 
                         return InkWell(
                           onTap: () => onQuestionTap(index),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(AppRadii.control),
                           child: Container(
                             decoration: BoxDecoration(
                               color: isCurrent
-                                  ? Theme.of(context).primaryColor
+                                  ? Theme.of(context).colorScheme.primary
                                   : isAnswered
-                                      ? Colors.green
-                                      : Colors.grey[200],
-                              borderRadius: BorderRadius.circular(8),
+                                  ? AppColors.success
+                                  : Colors.grey[200],
+                              borderRadius: BorderRadius.circular(
+                                AppRadii.control,
+                              ),
                               border: Border.all(
                                 color: isCurrent
-                                    ? Theme.of(context).primaryColor
+                                    ? Theme.of(context).colorScheme.primary
                                     : Colors.transparent,
                                 width: 2,
                               ),
@@ -718,10 +647,7 @@ class _QuestionOverviewSheet extends StatelessWidget {
                           color: Theme.of(context).primaryColor,
                           label: 'Current',
                         ),
-                        _LegendItem(
-                          color: Colors.green,
-                          label: 'Answered',
-                        ),
+                        _LegendItem(color: Colors.green, label: 'Answered'),
                         _LegendItem(
                           color: Colors.grey[200]!,
                           label: 'Unanswered',
@@ -745,11 +671,7 @@ class _LegendItem extends StatelessWidget {
   final String label;
   final Color? textColor;
 
-  const _LegendItem({
-    required this.color,
-    required this.label,
-    this.textColor,
-  });
+  const _LegendItem({required this.color, required this.label, this.textColor});
 
   @override
   Widget build(BuildContext context) {
@@ -760,16 +682,13 @@ class _LegendItem extends StatelessWidget {
           height: 16,
           decoration: BoxDecoration(
             color: color,
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(6),
           ),
         ),
         const SizedBox(width: 6),
         Text(
           label,
-          style: TextStyle(
-            fontSize: 12,
-            color: textColor ?? Colors.black87,
-          ),
+          style: TextStyle(fontSize: 12, color: textColor ?? Colors.black87),
         ),
       ],
     );
