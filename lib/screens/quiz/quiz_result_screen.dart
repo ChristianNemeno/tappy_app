@@ -20,17 +20,34 @@ class QuizResultScreen extends StatelessWidget {
   }
 
   String _getScoreMessage(double percentage) {
-    if (percentage >= 90) return 'Excellent! 🎉';
-    if (percentage >= 80) return 'Great Job! 👏';
-    if (percentage >= 70) return 'Good Work! 👍';
-    if (percentage >= 60) return 'Not Bad! 💪';
-    return 'Keep Practicing! 📚';
+    if (percentage >= 90) return 'Excellent! ';
+    if (percentage >= 80) return 'Great Job! ';
+    if (percentage >= 70) return 'Good Work! ';
+    if (percentage >= 60) return 'Not Bad! ';
+    return 'Keep Practicing! ';
   }
 
   IconData _getScoreIcon(double percentage) {
     if (percentage >= 80) return Icons.emoji_events;
     if (percentage >= 60) return Icons.stars;
     return Icons.trending_up;
+  }
+
+  String _formatDuration(String duration) {
+    try {
+      // Parse duration string (format: HH:MM:SS.mmm or similar)
+      final parts = duration.split(':');
+      if (parts.length >= 3) {
+        final hours = parts[0];
+        final minutes = parts[1];
+        // Remove milliseconds from seconds part
+        final seconds = parts[2].split('.')[0];
+        return '$hours:$minutes:$seconds';
+      }
+      return duration.split('.')[0]; // Fallback: just remove milliseconds
+    } catch (e) {
+      return duration; // Return original if parsing fails
+    }
   }
 
   @override
@@ -183,7 +200,7 @@ class QuizResultScreen extends StatelessWidget {
                             icon: Icons.timer,
                             accentColor: AppColors.warning,
                             label: 'Duration',
-                            value: result.duration,
+                            value: _formatDuration(result.duration),
                           ),
                         ),
                       ],
