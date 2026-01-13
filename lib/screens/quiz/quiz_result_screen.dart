@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../models/attempt_result.dart';
+import '../../theme/tokens.dart';
+import '../../widgets/design/fixed_width_container.dart';
+import '../../widgets/design/quiz_tiles.dart';
+import '../../widgets/design/surface_card.dart';
 import 'detailed_review_screen.dart';
 import 'leaderboard_screen.dart';
 
@@ -7,16 +11,12 @@ class QuizResultScreen extends StatelessWidget {
   final AttemptResult result;
   final int? quizId;
 
-  const QuizResultScreen({
-    super.key,
-    required this.result,
-    this.quizId,
-  });
+  const QuizResultScreen({super.key, required this.result, this.quizId});
 
   Color _getScoreColor(double percentage) {
-    if (percentage >= 80) return Colors.green;
-    if (percentage >= 60) return Colors.orange;
-    return Colors.red;
+    if (percentage >= 80) return AppColors.success;
+    if (percentage >= 60) return AppColors.warning;
+    return AppColors.danger;
   }
 
   String _getScoreMessage(double percentage) {
@@ -36,8 +36,12 @@ class QuizResultScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     print('[INFO] QuizResultScreen: Displaying results');
-    print('[DEBUG] QuizResultScreen: Score - ${result.score}/${result.totalQuestions} (${result.percentage.toStringAsFixed(1)}%)');
-    print('[DEBUG] QuizResultScreen: Correct: ${result.correctAnswers}, Incorrect: ${result.incorrectAnswers}');
+    print(
+      '[DEBUG] QuizResultScreen: Score - ${result.score}/${result.totalQuestions} (${result.percentage.toStringAsFixed(1)}%)',
+    );
+    print(
+      '[DEBUG] QuizResultScreen: Correct: ${result.correctAnswers}, Incorrect: ${result.incorrectAnswers}',
+    );
     final scoreColor = _getScoreColor(result.percentage);
 
     return Scaffold(
@@ -61,16 +65,13 @@ class QuizResultScreen extends StatelessWidget {
               width: double.infinity,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [
-                    scoreColor.withOpacity(0.2),
-                    scoreColor.withOpacity(0.05),
-                  ],
+                  colors: [scoreColor.withAlpha(40), scoreColor.withAlpha(10)],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
               ),
               child: Padding(
-                padding: const EdgeInsets.all(32),
+                padding: const EdgeInsets.all(AppSpacing.xl),
                 child: Column(
                   children: [
                     Icon(
@@ -78,31 +79,28 @@ class QuizResultScreen extends StatelessWidget {
                       size: 80,
                       color: scoreColor,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.md),
                     Text(
                       _getScoreMessage(result.percentage),
-                      style: TextStyle(
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontSize: 24,
-                        fontWeight: FontWeight.bold,
                         color: scoreColor,
                       ),
+                      textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.lg),
                     Container(
                       padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: scoreColor,
-                          width: 4,
-                        ),
+                        border: Border.all(color: scoreColor, width: 4),
                       ),
                       child: Container(
                         width: 140,
                         height: 140,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: scoreColor.withOpacity(0.1),
+                          color: scoreColor.withAlpha(20),
                         ),
                         child: Center(
                           child: Column(
@@ -118,23 +116,17 @@ class QuizResultScreen extends StatelessWidget {
                               ),
                               Text(
                                 'Score',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey[600],
-                                ),
+                                style: Theme.of(context).textTheme.bodySmall,
                               ),
                             ],
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.md),
                     Text(
                       result.quizTitle,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: Theme.of(context).textTheme.titleLarge,
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -142,129 +134,125 @@ class QuizResultScreen extends StatelessWidget {
               ),
             ),
 
-            // Statistics
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text(
-                    'Statistics',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+            FixedWidthContainer(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      'Statistics',
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _StatCard(
-                          icon: Icons.check_circle,
-                          iconColor: Colors.green,
-                          label: 'Correct',
-                          value: '${result.correctAnswers}',
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _StatCard(
-                          icon: Icons.cancel,
-                          iconColor: Colors.red,
-                          label: 'Incorrect',
-                          value: '${result.incorrectAnswers}',
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _StatCard(
-                          icon: Icons.quiz,
-                          iconColor: Colors.blue,
-                          label: 'Total Questions',
-                          value: '${result.totalQuestions}',
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _StatCard(
-                          icon: Icons.timer,
-                          iconColor: Colors.orange,
-                          label: 'Duration',
-                          value: result.duration,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Actions
-                  const Text(
-                    'Review',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DetailedReviewScreen(
-                            result: result,
+                    const SizedBox(height: AppSpacing.md),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: QuizMetricTile(
+                            icon: Icons.check_circle,
+                            accentColor: AppColors.success,
+                            label: 'Correct',
+                            value: '${result.correctAnswers}',
                           ),
                         ),
-                      );
-                    },
-                    icon: const Icon(Icons.list_alt),
-                    label: const Text('View Detailed Review'),
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(50),
-                      backgroundColor: Theme.of(context).primaryColor,
+                        const SizedBox(width: AppSpacing.sm + 4),
+                        Expanded(
+                          child: QuizMetricTile(
+                            icon: Icons.cancel,
+                            accentColor: AppColors.danger,
+                            label: 'Incorrect',
+                            value: '${result.incorrectAnswers}',
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  if (quizId != null)
-                    OutlinedButton.icon(
+                    const SizedBox(height: AppSpacing.sm + 4),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: QuizMetricTile(
+                            icon: Icons.quiz,
+                            accentColor: AppColors.info,
+                            label: 'Total Questions',
+                            value: '${result.totalQuestions}',
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.sm + 4),
+                        Expanded(
+                          child: QuizMetricTile(
+                            icon: Icons.timer,
+                            accentColor: AppColors.warning,
+                            label: 'Duration',
+                            value: result.duration,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+
+                    Text(
+                      'Review',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    ElevatedButton.icon(
                       onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => LeaderboardScreen(
-                              quizId: quizId!,
-                              quizTitle: result.quizTitle,
-                            ),
+                            builder: (context) =>
+                                DetailedReviewScreen(result: result),
                           ),
                         );
                       },
-                      icon: const Icon(Icons.leaderboard),
-                      label: const Text('View Leaderboard'),
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size.fromHeight(50),
+                      icon: const Icon(Icons.list_alt),
+                      label: const Text('View Detailed Review'),
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(
+                          AppSizes.minTapTarget,
+                        ),
                       ),
                     ),
-                  if (quizId != null) const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    onPressed: () {
-                      Navigator.popUntil(context, (route) => route.isFirst);
-                    },
-                    icon: const Icon(Icons.home),
-                    label: const Text('Back to Home'),
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(50),
+                    const SizedBox(height: AppSpacing.sm + 4),
+                    if (quizId != null)
+                      OutlinedButton.icon(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => LeaderboardScreen(
+                                quizId: quizId!,
+                                quizTitle: result.quizTitle,
+                              ),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.leaderboard),
+                        label: const Text('View Leaderboard'),
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(
+                            AppSizes.minTapTarget,
+                          ),
+                        ),
+                      ),
+                    if (quizId != null)
+                      const SizedBox(height: AppSpacing.sm + 4),
+                    OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.popUntil(context, (route) => route.isFirst);
+                      },
+                      icon: const Icon(Icons.home),
+                      label: const Text('Back to Home'),
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(
+                          AppSizes.minTapTarget,
+                        ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.lg),
 
-                  // Time Info
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
+                    SurfaceCard(
+                      margin: EdgeInsets.zero,
                       child: Column(
                         children: [
                           _InfoRow(
@@ -281,8 +269,8 @@ class QuizResultScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],
@@ -304,51 +292,6 @@ class QuizResultScreen extends StatelessWidget {
   }
 }
 
-class _StatCard extends StatelessWidget {
-  final IconData icon;
-  final Color iconColor;
-  final String label;
-  final String value;
-
-  const _StatCard({
-    required this.icon,
-    required this.iconColor,
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Icon(icon, size: 32, color: iconColor),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _InfoRow extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -364,22 +307,13 @@ class _InfoRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 20, color: Colors.grey[600]),
+        Icon(icon, size: 20, color: AppColors.textGray),
         const SizedBox(width: 12),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey[600],
-          ),
-        ),
+        Text(label, style: TextStyle(fontSize: 14, color: AppColors.textGray)),
         const Spacer(),
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
       ],
     );
