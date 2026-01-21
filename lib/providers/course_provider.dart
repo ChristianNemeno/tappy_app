@@ -47,6 +47,7 @@ class CourseProvider extends ChangeNotifier {
     try {
       final courses = await _courseService.getCoursesBySubject(subjectId);
       _coursesBySubject[subjectId] = courses;
+      _courses = courses; // Update main list
       _error = null;
       _setLoading(false);
       return courses;
@@ -54,6 +55,11 @@ class CourseProvider extends ChangeNotifier {
       _setError(e.toString());
       return [];
     }
+  }
+
+  /// Fetch courses by subject (alias for consistency with screens)
+  Future<void> fetchCoursesBySubject(int subjectId) async {
+    await getCoursesBySubject(subjectId, forceRefresh: true);
   }
 
   /// Get course by ID with units

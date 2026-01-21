@@ -6,6 +6,7 @@ import 'package:tappy_app/widgets/design/fixed_width_container.dart';
 import 'package:tappy_app/widgets/design/inline_message_banner.dart';
 import 'package:tappy_app/widgets/design/surface_card.dart';
 import 'package:tappy_app/widgets/quiz_card.dart';
+import 'subject_list_screen.dart';
 
 class DiscoverScreen extends StatefulWidget {
   const DiscoverScreen({super.key});
@@ -34,6 +35,19 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
       appBar: AppBar(
         title: const Text('Discover Quizzes'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.school),
+            onPressed: () {
+              print('[INFO] DiscoverScreen: Navigating to subject browser');
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SubjectListScreen(),
+                ),
+              );
+            },
+            tooltip: 'Browse by Subject',
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {

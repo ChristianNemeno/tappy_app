@@ -6,6 +6,7 @@ class UnitProvider extends ChangeNotifier {
   final UnitService _unitService;
 
   UnitDetail? _currentUnit;
+  List<Unit> _units = []; // Add this to store current list
   Map<int, List<Unit>> _unitsByCourse = {}; // Cache units by course
   Map<int, List<Quiz>> _quizzesByUnit = {}; // Cache quizzes by unit
   bool _isLoading = false;
@@ -13,6 +14,7 @@ class UnitProvider extends ChangeNotifier {
 
   // Getters
   UnitDetail? get currentUnit => _currentUnit;
+  List<Unit> get units => _units; // Add this getter
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -30,6 +32,7 @@ class UnitProvider extends ChangeNotifier {
     try {
       final units = await _unitService.getUnitsByCourse(courseId);
       _unitsByCourse[courseId] = units;
+      _units = units; // Update main list
       _error = null;
       _setLoading(false);
       return units;
@@ -37,6 +40,11 @@ class UnitProvider extends ChangeNotifier {
       _setError(e.toString());
       return [];
     }
+  }
+
+  /// Fetch units by course (alias for consistency with screens)
+  Future<void> fetchUnitsByCourse(int courseId) async {
+    await getUnitsByCourse(courseId, forceRefresh: true);
   }
 
   /// Get unit by ID with quizzes
@@ -73,6 +81,11 @@ class UnitProvider extends ChangeNotifier {
       _setError(e.toString());
       return [];
     }
+  }
+
+  /// Fetch quizzes by unit (alias for consistency with screens)
+  Future<List<Quiz>> fetchQuizzesByUnit(int unitId) async {
+    return await getQuizzesByUnit(unitId, forceRefresh: true);
   }
 
   /// Create new unit

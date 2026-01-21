@@ -122,6 +122,11 @@ class SubjectProvider extends ChangeNotifier {
     await fetchSubjects();
   }
 
+  /// Refresh subjects list (alias for consistency)
+  Future<void> refreshSubjects() async {
+    await fetchSubjects();
+  }
+
   /// Clear current subject
   void clearCurrentSubject() {
     _currentSubject = null;
