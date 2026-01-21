@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/quiz_attempt.dart';
 import '../models/attempt_result.dart';
 import '../models/question.dart';
+import '../models/leaderboard_entry.dart';
 import '../services/attempt_service.dart';
 import 'dart:developer' as developer;
 
@@ -12,6 +13,8 @@ class AttemptProvider extends ChangeNotifier {
   List<Question>? _questions;
   Map<int, int> _answers = {}; // questionId -> choiceId
   AttemptResult? _lastResult;
+  List<QuizAttempt> _userAttempts = [];
+  List<LeaderboardEntry> _leaderboard = [];
   bool _isLoading = false;
   String? _error;
 
@@ -20,6 +23,8 @@ class AttemptProvider extends ChangeNotifier {
   List<Question>? get questions => _questions;
   Map<int, int> get answers => Map.unmodifiable(_answers);
   AttemptResult? get lastResult => _lastResult;
+  List<QuizAttempt> get userAttempts => _userAttempts;
+  List<LeaderboardEntry> get leaderboard => _leaderboard;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -177,6 +182,50 @@ class AttemptProvider extends ChangeNotifier {
   void clearLastResult() {
     _lastResult = null;
     notifyListeners();
+  }
+
+  /// Fetch user's attempt history
+  Future<void> fetchUserAttempts() async {
+    _setLoading(true);
+    
+    try {
+      _userAttempts = await _attemptService.getUserAttempts();
+      _error = null;
+      _setLoading(false);
+    } catch (e) {
+      _log('❌ Failed to fetch user attempts', error: e);
+      _setError(e.toString());
+    }
+  }
+
+  /// Fetch leaderboard for a quiz
+  Future<void> fetchLeaderboard(int quizId, {int topCount = 10}) async {
+    _setLoading(true);
+    
+    try {
+      _leaderboard = await _attemptService.getLeaderboard(quizId, topCount: topCount);
+      _error = null;
+      _setLoading(false);
+    } catch (e) {
+      _log('❌ Failed to fetch leaderboard', error: e);
+      _setError(e.toString());
+    }
+  }
+
+  /// Get attempt result by ID
+  Future<AttemptResult?> getAttemptResult(int attemptId) async {
+    _setLoading(true);
+    
+    try {
+      final result = await _attemptService.getAttemptResult(attemptId);
+      _error = null;
+      _setLoading(false);
+      return result;
+    } catch (e) {
+      _log('❌ Failed to fetch attempt result', error: e);
+      _setError(e.toString());
+      return null;
+    }
   }
 
   // Private helper methods

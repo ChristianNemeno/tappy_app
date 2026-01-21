@@ -102,6 +102,18 @@ class AttemptService {
     }
   }
 
+  /// GET /api/quiz-attempt/quiz/{quizId} - Get all attempts for a quiz
+  Future<List<QuizAttempt>> getQuizAttempts(int quizId) async {
+    final response = await _apiClient.get('/quiz-attempt/quiz/$quizId');
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => QuizAttempt.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load quiz attempts');
+    }
+  }
+
   /// GET /api/quiz-attempt/quiz/{quizId}/leaderboard
   Future<List<LeaderboardEntry>> getLeaderboard(int quizId, {int topCount = 10}) async {
     print('📊 Fetching leaderboard for quiz $quizId (top $topCount)');

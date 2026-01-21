@@ -136,6 +136,7 @@ class _QuizDetailScreenState extends State<QuizDetailScreen> {
               id: quizDetail.id,
               title: quizDetail.title,
               description: quizDetail.description,
+              orderIndex: 0,
               createdById: quizDetail.createdById,
               createdByName: quizDetail.createdByName,
               isActive: quizDetail.isActive,
