@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../models/leaderboard_entry.dart';
+import '../../models/attempt/leaderboard_entry.dart';
 import '../../services/attempt_service.dart';
 import '../../providers/auth_provider.dart';
 

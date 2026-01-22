@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/quiz_attempt.dart';
+import '../models/attempt/quiz_attempt.dart';
 import '../services/attempt_service.dart';
 import 'quiz/quiz_result_screen.dart';
 import 'package:tappy_app/widgets/design/buttons.dart';

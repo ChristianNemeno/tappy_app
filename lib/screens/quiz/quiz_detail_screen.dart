@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../models/quiz.dart';
-import '../../models/quiz_detail.dart';
+import '../../models/quiz/quiz.dart';
+import '../../models/quiz/quiz_detail.dart';
 import '../../services/quiz_service.dart';
 import '../../providers/attempt_provider.dart';
 import 'quiz_taking_screen.dart';

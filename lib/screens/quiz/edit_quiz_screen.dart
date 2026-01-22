@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../models/quiz.dart';
-import '../../models/update_quiz_dto.dart';
+import '../../models/quiz/quiz.dart';
+import '../../models/quiz/update_quiz_dto.dart';
 import '../../services/quiz_service.dart';
 
 class EditQuizScreen extends StatefulWidget {

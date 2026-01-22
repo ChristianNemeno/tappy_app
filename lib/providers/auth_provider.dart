@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/auth_response.dart';
+import '../models/auth/auth_response.dart';
 import '../services/auth_service.dart';
 import 'dart:developer' as developer;
 

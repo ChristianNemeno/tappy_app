@@ -1,10 +1,10 @@
 // lib/services/attempt_service.dart
 import 'dart:convert';
-import '../models/quiz_attempt.dart';
-import '../models/submit_attempt_request.dart';
-import '../models/submit_answer.dart';
-import '../models/attempt_result.dart';
-import '../models/leaderboard_entry.dart';
+import '../models/attempt/quiz_attempt.dart';
+import '../models/attempt/submit_attempt_request.dart';
+import '../models/attempt/submit_answer.dart';
+import '../models/attempt/attempt_result.dart';
+import '../models/attempt/leaderboard_entry.dart';
 import '../utils/api_client.dart';
 
 class AttemptService {

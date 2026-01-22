@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../models/attempt_result.dart';
-import '../../models/question_result.dart';
+import '../../models/attempt/attempt_result.dart';
+import '../../models/attempt/question_result.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/design/fixed_width_container.dart';
 import '../../widgets/design/quiz_tiles.dart';

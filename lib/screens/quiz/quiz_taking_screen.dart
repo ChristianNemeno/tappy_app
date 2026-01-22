@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../models/question.dart';
-import '../../models/quiz.dart';
+import '../../models/quiz/question.dart';
+import '../../models/quiz/quiz.dart';
 import '../../providers/attempt_provider.dart';
 import '../../theme/tokens.dart';
 import '../../widgets/design/fixed_width_container.dart';

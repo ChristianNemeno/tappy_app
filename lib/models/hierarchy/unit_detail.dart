@@ -1,4 +1,4 @@
-import 'quiz.dart';
+import '../quiz/quiz.dart';
 
 class UnitDetail {
   final int id;

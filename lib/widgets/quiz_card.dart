@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/quiz.dart';
+import '../models/quiz/quiz.dart';
 import '../screens/quiz/quiz_detail_screen.dart';
 
 class QuizCard extends StatelessWidget {

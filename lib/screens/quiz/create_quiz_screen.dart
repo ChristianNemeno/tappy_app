@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../models/create_quiz_dto.dart';
-import '../../models/create_question_dto.dart';
-import '../../models/create_choice_dto.dart';
+import '../../models/quiz/create_quiz_dto.dart';
+import '../../models/quiz/create_question_dto.dart';
+import '../../models/quiz/create_choice_dto.dart';
 import '../../services/quiz_service.dart';
 import 'add_questions_screen.dart';
 

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../models/quiz_attempt.dart';
-import '../models/attempt_result.dart';
-import '../models/question.dart';
-import '../models/leaderboard_entry.dart';
+import '../models/attempt/quiz_attempt.dart';
+import '../models/attempt/attempt_result.dart';
+import '../models/quiz/question.dart';
+import '../models/attempt/leaderboard_entry.dart';
 import '../services/attempt_service.dart';
 import 'dart:developer' as developer;
 

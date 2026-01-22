@@ -1,9 +1,9 @@
 import 'dart:convert';
-import '../models/quiz.dart';
-import '../models/quiz_detail.dart';
-import '../models/create_quiz_dto.dart';
-import '../models/create_question_dto.dart';
-import '../models/update_quiz_dto.dart';
+import '../models/quiz/quiz.dart';
+import '../models/quiz/quiz_detail.dart';
+import '../models/quiz/create_quiz_dto.dart';
+import '../models/quiz/create_question_dto.dart';
+import '../models/quiz/update_quiz_dto.dart';
 import '../utils/api_client.dart';
 
 class QuizService {

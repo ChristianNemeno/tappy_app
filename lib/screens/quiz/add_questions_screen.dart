@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../models/create_question_dto.dart';
-import '../../models/create_choice_dto.dart';
+import '../../models/quiz/create_question_dto.dart';
+import '../../models/quiz/create_choice_dto.dart';
 
 class AddQuestionsScreen extends StatefulWidget {
   final List<CreateQuestionDto> initialQuestions;

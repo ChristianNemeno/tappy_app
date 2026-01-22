@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/unit.dart';
-import '../models/quiz.dart';
+import '../models/hierarchy/unit.dart';
+import '../models/quiz/quiz.dart';
 import '../providers/unit_provider.dart';
 import '../widgets/breadcrumb_navigation.dart';
 import '../widgets/quiz_card.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/course.dart';
+import '../models/hierarchy/course.dart';
 import '../providers/course_provider.dart';
 import '../widgets/breadcrumb_navigation.dart';
 import 'unit_list_screen.dart';
